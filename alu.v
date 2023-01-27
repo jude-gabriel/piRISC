@@ -1,12 +1,12 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: University of Portland
+// Engineer: Jude Gabriel
 // 
 // Create Date: 01/26/2023 10:15:57 PM
-// Design Name: 
+// Design Name: piRISC ALU
 // Module Name: alu
-// Project Name: 
+// Project Name: piRISC
 // Target Devices: 
 // Tool Versions: 
 // Description: 
