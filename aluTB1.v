@@ -52,7 +52,7 @@ initial
     begin
         #10 opcode = 5'b00001; a = $urandom; b = $urandom;
         #1
-        if(out ==  a + b)
+        if(out ==  (a + b))
             begin
               $display("Sum is correct");
               $displayh(out);
@@ -70,7 +70,7 @@ initial
     begin
         #10 opcode = 5'b10001; a = $urandom; b = $urandom;
         #1
-        if(out ==  a - b)
+        if(out ==  (a - b))
             begin
               $display("Difference is correct");
               $displayh(out);
@@ -88,7 +88,7 @@ initial
     begin
         #10 opcode = 5'b01001; a = $urandom; b = $urandom;
         #1
-        if(out ==  a ^ b)
+        if(out ==  (a ^ b))
             begin
               $display("XOR is correct");
               $displayh(out);
@@ -104,9 +104,9 @@ initial
     //Test OR: 01101
     for(integer i = 0; i < 10; i = i + 1)
     begin
-        #10 opcode = 5'b01001; a = $urandom; b = $urandom;
+        #10 opcode = 5'b01101; a = $urandom; b = $urandom;
         #1
-        if(out ==  a | b)
+        if(out ==  (a | b))
             begin
               $display("OR is correct");
               $displayh(out);
@@ -115,6 +115,7 @@ initial
             begin
               $display("OR is Wrong");
               $displayh(out);
+              $displayh(a | b);
               $stop;
             end
     end
@@ -123,8 +124,8 @@ initial
     for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = 5'b01111; a = $urandom; b = $urandom;
-        #1
-        if(out == a & b)
+        #10
+        if(out == (a & b))
             begin
               $display("AND is correct");
               $displayh(out);
@@ -143,7 +144,7 @@ initial
     begin
         #10 opcode = 5'b00011; a = $urandom; b = $urandom;
         #1
-        if(out ==  a << b)
+        if(out ==  (a << b))
             begin
               $display("SLL is correct");
               $displayh(out);
@@ -153,7 +154,7 @@ initial
               $display("SLL is Wrong");
               $displayh(out);
               $displayh(a << b);
-              //$stop;
+              $stop;
             end
     end
     
@@ -161,9 +162,11 @@ initial
     //SLT: 00101 (signed)
      for(integer i = 0; i < 10; i = i + 1)
     begin
-        #10 opcode = 5'b00101; aSigned = $random; bSigned = $random;
+        #10 opcode = 5'b00101; a = $random; b = $random;
+            aSigned = a; 
+            bSigned = b; 
         #1
-        if(out ==  (aSigned < bSigned) ? 1:0)
+        if(out ==  ((aSigned < bSigned) ? 1:0))
             begin
               $display("SLT is correct");
               $displayh(out);
@@ -172,8 +175,8 @@ initial
             begin
               $display("SLT is Wrong");
               $displayh(out);
-              $displayh((aSigned < bSigned) ? 1:0);
-              //$stop;
+              $displayh(((aSigned < bSigned) ? 1:0));
+              $stop;
             end
     end    
             

@@ -36,7 +36,7 @@ input [VAR_WIDTH-1:0] a;
 input [VAR_WIDTH-1:0] b;
 
 // The base opcode is stored in bits 3-1
-wire baseOp = opcode[3:1];
+wire [OP_WIDTH-2:0] baseOp = opcode[3:1];
 
 // Shift right and subtraction are determined by bit 30 in the ISA (See schematic)
 wire isFunc7Extension = opcode[4];
@@ -77,10 +77,10 @@ always @(*)
                 'b001: out <= a << b;
                 
                 // Set Less Than (Uses signed types)
-                'b010: out <= (aSigned < bSigned) ? 1:0;
+                'b010: out <= ((aSigned < bSigned) ? 1:0);
                 
                 // Set Less Than Unsigned
-                'b011: out <= (a < b) ? 1:0;
+                'b011: out <= ((a < b) ? 1:0);
                 
                 // XOR
                 'b100: out <= a ^ b;
@@ -102,7 +102,7 @@ always @(*)
                 'b110: out <= a | b; 
                 
                 // AND  
-                'b111: out <= a | b;
+                'b111: out <= a & b;
                 
                 // Default: should never be reached
                 default: out <= a + b;
