@@ -1,20 +1,20 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: University of Portland
+// Engineer: Nick Markels, Jude Gabriel
 // 
 // Create Date: 01/27/2023 12:42:47 PM
-// Design Name: 
+// Design Name: ALU Testbench
 // Module Name: aluTB
-// Project Name: 
+// Project Name: piRISC
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: Test bench for the piRISC ALU
 // 
 // Dependencies: 
 // 
 // Revision:
-// Revision 0.01 - File Created
+// Revision 0.02 - Fixed AND and SLT errors
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
