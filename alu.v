@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "alu_defines.v"
 //////////////////////////////////////////////////////////////////////////////////
 // Company: University of Portland
 // Engineer: Jude Gabriel
@@ -9,12 +10,12 @@
 // Project Name: piRISC
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: ALU 
 // 
 // Dependencies: 
 // 
 // Revision:
-// Revision 0.01 - File Created
+// Revision 0.02 - Changed operation. ALU should not have to decode
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -22,8 +23,9 @@
 
 module alu(out, opcode, a, b);
 
+// Variable and Opcode Widths
 parameter VAR_WIDTH = 32;
-parameter OP_WIDTH = 5;
+parameter OP_WIDTH = 4;
 
 // ALU output (reg type for procedural assignemnt)
 output reg [VAR_WIDTH-1:0] out;
@@ -35,14 +37,6 @@ input [OP_WIDTH-1:0] opcode;
 input [VAR_WIDTH-1:0] a;
 input [VAR_WIDTH-1:0] b;
 
-// The base opcode is stored in bits 3-1
-wire [OP_WIDTH-2:0] baseOp = opcode[3:1];
-
-// Shift right and subtraction are determined by bit 30 in the ISA (See schematic)
-wire isFunc7Extension = opcode[4];
-
-// ISA determines that there is no subtraction immediate, must default back to addition for I-type(See schematic)
-wire isRType = opcode[0];
 
 // Verilog wire types are default unsigned, a signed verison is needed for slt and slti conversions 
 wire signed [VAR_WIDTH-1:0] aSigned = a;
@@ -50,62 +44,18 @@ wire signed [VAR_WIDTH-1:0] bSigned = b;
 
 always @(*)
     begin   
-        case(baseOp)
-            
-            // Addition/Subtraction:
-            // If it is I-type it has to be addition via ISA
-            // If R-type if it is not func7 extended, it is addition
-            // If R-type and func7 extended, it is subtraction
-            'b000:
-                if(!isRType)
-                    begin
-                        out <= a + b;
-                    end 
-                else
-                    begin
-                        if(isFunc7Extension)
-                            begin
-                                out <= a - b;
-                            end 
-                        else
-                            begin
-                                out <= a + b;
-                            end 
-                    end 
-                 
-                // Shift Left logical  
-                'b001: out <= a << b;
-                
-                // Set Less Than (Uses signed types)
-                'b010: out <= ((aSigned < bSigned) ? 1:0);
-                
-                // Set Less Than Unsigned
-                'b011: out <= ((a < b) ? 1:0);
-                
-                // XOR
-                'b100: out <= a ^ b;
-                
-                // Shift Right:
-                // Standard logical shift
-                // If func7 extended, then it is arithmetic per the ISA
-                'b101:
-                    if(isFunc7Extension)
-                        begin 
-                            out <= a >>> b; 
-                        end 
-                    else 
-                        begin 
-                            out <= a >> b; 
-                        end 
-                
-                // OR 
-                'b110: out <= a | b; 
-                
-                // AND  
-                'b111: out <= a & b;
-                
-                // Default: should never be reached
-                default: out <= a + b;
+        case(opcode)
+            `ALUADD:    out <= a + b;
+            `ALUSUB:    out <= a - b;
+            `ALUXOR:    out <= a ^ b;
+            `ALUOR:     out <= a | b;
+            `ALUAND:    out <= a & b;
+            `ALUSLL:    out <= a << b;
+            `ALUSRL:    out <= a >> b;
+            `ALUSRA:    out <= a >>> b;
+            `ALUSLT:    out <= (aSigned < bSigned) ? 1:0;
+            `ALUSLTU:   out <= (a < b) ? 1:0;
+            default:    out <= 32'b0;
         endcase
     end 
 endmodule
