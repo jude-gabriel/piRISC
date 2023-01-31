@@ -54,6 +54,22 @@ always @(*)
                      `RSLTU:               aluop <= `ALUSLTU;
                      default:              aluop <= `ALUADD;
                 endcase
+            `ITYPE:
+                case(func3)
+                    `IADD:                 aluop <= `ALUADD;
+                    `IXOR:                 aluop <= `ALUXOR;
+                    `IOR:                  aluop <= `ALUOR;
+                    `IAND:                 aluop <= `ALUAND;
+                    `ISLL:                 aluop <= `ALUSLL;
+                    `ISRLSRA:         
+                        if(func7 == `ISRL) aluop <= `ALUSRL;
+                        else               aluop <= `ALUSRA;
+                    `ISLT:                 aluop <= `ALUSLT;
+                    `ISLTU:                aluop <= `ALUSLTU;
+                    default:               aluop <= `ALUADD;       
+                endcase 
+            `LOADTYPE:                     aluop <= `ALUADD;
+            `STYPE:                        aluop <= `ALUADD;
              default: aluop <= `ALUADD;
         
         endcase

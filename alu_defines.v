@@ -45,3 +45,16 @@
 `define RSRL     1'b0
 `define RSRA     1'b1
 
+// Operations defined in ITYPE
+`define IADD     4'b0000
+`define IXOR     4'b1000
+`define IOR      4'b1010
+`define IAND     4'b1011
+`define ISLL     4'b0001
+`define ISRLSRA  4'b1001
+`define ISLT     4'b0010
+`define ISLTU    4'b0011
+`define ISRL     1'b0
+`define ISRA     1'b1
+
+
