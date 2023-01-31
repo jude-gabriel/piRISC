@@ -25,7 +25,8 @@
 //SUB: 10001
 //XOR: 01001
 //OR: 01101
-//AND ::
+//AND 01111
+//SLL 00011
 
 
 module ALU_tb;
@@ -130,7 +131,7 @@ initial
     //XOR: 01001
      #10 opcode = 'b01001; a = 32'haa554422; b = 32'h00993300;
     #1
-    if(out ==  32'haacc7722)
+    if(out ==  a ^ b)
         begin
           $display("XOR is correct");
         end
@@ -144,7 +145,7 @@ initial
         
     #10 opcode = 'b01001; a = 32'h00ffdd88; b = 32'hff009865;
     #1
-    if(out ==  32'hffff45ed)
+    if(out ==  a ^ b)
         begin
           $display("XOR is correct");
         end
@@ -158,7 +159,7 @@ initial
         
     #10 opcode = 'b01001; a = 32'haadd9987; b = 32'h0087ff78;
     #1
-    if(out ==  32'haa5a66ff)
+    if(out ==  a ^ b)
         begin
           $display("XOR is correct");
         end
@@ -173,7 +174,7 @@ initial
     //OR: 01101
      #10 opcode = 'b01101; a = 32'haa554422; b = 32'haa554422;
     #1
-    if(out ==  32'haa554422)
+    if(out ==   a | b)
         begin
           $display("OR is correct");
         end
@@ -187,7 +188,7 @@ initial
         
     #10 opcode = 'b01101; a = 32'h00ffdd88; b = 32'hff009865;
     #1
-    if(out ==  32'hffffdded)
+    if(out ==   a | b)
         begin
           $display("OR is correct");
         end
@@ -201,7 +202,7 @@ initial
         
     #10 opcode = 'b01101; a = 32'haadd9987; b = 32'h0087ff78;
     #1
-    if(out ==  32'haadfffff)
+    if(out ==   a | b)
         begin
           $display("OR is correct");
         end
@@ -212,6 +213,8 @@ initial
           $displayh(a | b);
           //$stop;
         end
+        
+    
         
             
     #10 $stop;
