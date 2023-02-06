@@ -44,12 +44,12 @@ reg signed [VAR_WIDTH-1:0] aSigned, bSigned;
 
 
 alu alu1(out, opcode, a, b);
-integer i;
+
 initial
    begin
     
     //Test Add
-    for(i = 0; i < 10; i = i + 1)
+    for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = `ALUADD; a = $urandom; b = $urandom;
         #1
@@ -67,7 +67,7 @@ initial
         end
         
    //Test Subtract
-    for(i = 0; i < 10; i = i + 1)
+    for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = `ALUSUB; a = $urandom; b = $urandom;
         #1
@@ -85,7 +85,7 @@ initial
         end
         
     //Test XOR
-    for(i = 0; i < 10; i = i + 1)
+    for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = `ALUXOR; a = $urandom; b = $urandom;
         #1
@@ -103,7 +103,7 @@ initial
         end
         
     //Test OR
-    for(i = 0; i < 10; i = i + 1)
+    for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = `ALUOR; a = $urandom; b = $urandom;
         #1
@@ -121,7 +121,7 @@ initial
         end
         
     //Test And
-    for(i = 0; i < 10; i = i + 1)
+    for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = `ALUAND; a = $urandom; b = $urandom;
         #1
@@ -140,7 +140,7 @@ initial
         end
         
    //Test SLL
-    for(i = 0; i < 10; i = i + 1)
+    for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = `ALUSLL; a = $urandom; b = $urandom%32;
         #1
@@ -158,7 +158,7 @@ initial
         end
         
     //Test SRL
-    for(i = 0; i < 10; i = i + 1)
+    for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = `ALUSRL; a = $urandom; b = $urandom%32;
         #1
@@ -177,7 +177,7 @@ initial
         end
         
     //Test SRA
-    for(i = 0; i < 10; i = i + 1)
+    for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = `ALUSRA; a = $urandom; b = $urandom%32;
         #1
@@ -196,7 +196,7 @@ initial
         end
         
    //Test SLT
-    for(i = 0; i < 10; i = i + 1)
+    for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = `ALUSLT; a = $random; b = $random%32;
         aSigned = a;
@@ -217,7 +217,7 @@ initial
         end
             
     //Test SLTU
-    for(i = 0; i < 10; i = i + 1)
+    for(integer i = 0; i < 10; i = i + 1)
     begin
         #10 opcode = `ALUSLTU; a = $urandom; b = $urandom%32;
         #1
