@@ -32,28 +32,28 @@
 `define ALUSLTU 4'b1001
 
 // Operations defined in RTYPE
-`define RADDSUB  4'b0000
-`define RXOR     4'b1000
-`define ROR      4'b1010
-`define RAND     4'b1011
-`define RSLL     4'b0001
-`define RSRLSRA  4'b1001
-`define RSLT     4'b0010
-`define RSLTU    4'b0011
+`define RADDSUB  3'b000
+`define RXOR     3'b100
+`define ROR      3'b110
+`define RAND     3'b111
+`define RSLL     3'b001
+`define RSRLSRA  3'b101
+`define RSLT     3'b010
+`define RSLTU    3'b011
 `define RADD     1'b0
 `define RSUB     1'b1
 `define RSRL     1'b0
 `define RSRA     1'b1
 
 // Operations defined in ITYPE
-`define IADD     4'b0000
-`define IXOR     4'b1000
-`define IOR      4'b1010
-`define IAND     4'b1011
-`define ISLL     4'b0001
-`define ISRLSRA  4'b1001
-`define ISLT     4'b0010
-`define ISLTU    4'b0011
+`define IADD     3'b000
+`define IXOR     3'b100
+`define IOR      3'b110
+`define IAND     3'b111
+`define ISLL     3'b001
+`define ISRLSRA  3'b101
+`define ISLT     3'b010
+`define ISLTU    3'b011
 `define ISRL     1'b0
 `define ISRA     1'b1
 
