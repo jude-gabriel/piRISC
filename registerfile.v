@@ -23,7 +23,7 @@
 module registerfile (
   input wire clk,
   input wire [4:0] rd_addrA,
-	input wire [4:0] rd_addrB,
+  input wire [4:0] rd_addrB,
   input wire [4:0] wr_addr,
   input wire [31:0] wr_data,
   input wire RegWrite,
