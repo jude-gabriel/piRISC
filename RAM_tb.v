@@ -1,51 +1,79 @@
-//-------------------------------------------------------
-//	Module: Testbench for 32-bit RAM 
-//	Author: Jude Gabriel
-//------------------------------------------------------
+`timescale 1ns / 1ns
+//////////////////////////////////////////////////////////////////////////////////
+// Company: Univerity of Portland 
+// Engineer: Jude Gabriel 
+// 
+// Create Date: 02/09/2023 03:05:21 PM
+// Design Name: RAM Testbench 
+// Module Name: ram_tb
+// Project Name: piRISC
+// Target Devices: 
+// Tool Versions: 
+// Description: Testbench for the RAM block
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
 
-`timescale 1ns/1ns
 
+module ram_tb;
 
-module RAM_tb;
+    // Input-Output size
+    parameter WIDTH = 32;
 
-parameter WIDTH = 32;
+    // Inputs
+    reg [WIDTH-1:0] wr_data;
+    reg [WIDTH-1:0] addr;
 
-reg [WIDTH-1:0] wr_data, addr;
-reg rdEn, wrEn, clk;
-wire [WIDTH-1:0] rd_data;
-reg [WIDTH-1:0] test_data;
+    // Outputs 
+    wire [WIDTH-1:0] rd_data;
 
-RAM ram1(wr_data, rd_data, rdEn, wrEn, addr, clk);
+    // Control Signals 
+    reg isByte;
+    reg isHalf;
+    reg isWord;
+    reg rdEn;
+    reg wrEn;
 
-initial 
-    begin 
-  clk = 0;
-  forever #10 clk = !clk;
-    end
+    // Clock signal
+    reg clk;
+    initial 
+        begin 
+            clk = 0;
+            forever #10 clk = !clk;
+        end 
+        
+    // Instantiate model 
+    RAM ram1(wr_data, rd_data, rdEn, wrEn, addr, isByte, isHalf, isWord, clk);
+    
+    // Main Tests 
+    initial 
+        begin 
 
-initial
-    begin 
-        for(integer i = 0; i < 1024; i = i + 4)
-            begin
-            test_data = $urandom;
-            #10 wrEn = 1; rdEn = 0; wr_data = test_data; addr = i;
-            #10 rdEn = 1; wrEn =0;
-            #20
-            if(rd_data == test_data) $display("Correct value at address %h is %h", addr, rd_data);
-            else $display("Incorrect Value");
-         end
-         
-          for(integer i = 0; i < 1024; i = i + 4)
-            begin
-            test_data = $urandom;
-            #10 wrEn = 1; rdEn = 0; wr_data = test_data; addr = i;
-            #10 rdEn = 1; wrEn =0;
-            #20
-            if(rd_data == test_data) $display("Correct value at address %h is %h", addr, rd_data);
-            else $display("Incorrect Value");
-         end
-        $stop;
-        $stop;
-    end
+            // Write different sizes to first three address locations
+            wrEn = 0;
+            #20 wrEn = 1; rdEn = 0; wr_data = 32'hFFFFFFFF; addr = 32'h00000000; isByte = 1; isHalf = 0; isWord = 0;
+            #20 wrEn = 0;
+            #20 wrEn = 1; rdEn = 0; wr_data = 32'hFFFFFFFF; addr = 32'h00000004; isByte = 0; isHalf = 1; isWord = 0;
+            #20 wrEn = 0; 
+            #20 wrEn = 1; rdEn = 0; wr_data = 32'hFFFFFFFF; addr = 32'h00000008; isByte = 0; isHalf = 0; isWord = 1;
+            #20 wrEn = 0;
 
-endmodule 
+            // Read all locations at different sizes
+            #20 wrEn = 0; rdEn = 1; addr = 32'h00000008; isByte = 1; isHalf = 0; isWord = 0;
+            #20 rdEn = 0;
+            #20 wrEn = 0; rdEn = 1; addr = 32'h00000008; isByte = 0; isHalf = 1; isWord = 0;
+            #20 rdEn = 0;
+            #20 wrEn = 0; rdEn = 1; addr = 32'h00000000; isByte = 0; isHalf = 0; isWord = 1;
+            #20 rdEn = 0;
+            #20 wrEn = 0; rdEn = 1; addr = 32'h00000004; isByte = 0; isHalf = 0; isWord = 1;
+            #20 rdEn = 0;
+            #20 wrEn = 0; rdEn = 1; addr = 32'h00000008; isByte = 0; isHalf = 0; isWord = 1;
+            #20 rdEn = 0;
+            $stop;
+        end 
+endmodule
