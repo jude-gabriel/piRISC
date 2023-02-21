@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module PC_controller(clk, pc_in, immgen_in, alu_in, pc_select, pc_value);
+module PC_controller(clk, pc_in, immgen_in, alu_in, pc_select, pc_value, comparator);
 
     // Operations for PC
     `define PCADD4 2'b00
@@ -31,7 +31,9 @@ module PC_controller(clk, pc_in, immgen_in, alu_in, pc_select, pc_value);
     input wire clk;
     input wire [DWIDTH-1:0] pc_in, immgen_in, alu_in;
     input wire [1:0] pc_select;
+    input wire comparator
     output reg [DWIDTH-1:0] pc_value;
+
     
     always @(posedge clk)
     begin
@@ -40,7 +42,7 @@ module PC_controller(clk, pc_in, immgen_in, alu_in, pc_select, pc_value);
             pc_value <= pc_in + 4'h4;
         end
         
-        else if(pc_select == `IMMGEN)
+        else if(pc_select == `IMMGEN || comparator)
         begin
             pc_value <= pc_in + immgen_in;
         end
