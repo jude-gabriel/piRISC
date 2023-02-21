@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module PC_controller(clk, pc_in, immgen_in, alu_in, pc_select, pc_value, comparator);
+module PC_controller(clk, pc_in, pc_en, immgen_in, alu_in, pc_select, pc_value, comparator);
 
     // Operations for PC
     `define PCADD4 2'b00
@@ -29,6 +29,7 @@ module PC_controller(clk, pc_in, immgen_in, alu_in, pc_select, pc_value, compara
     parameter DWIDTH = 32;
      
     input wire clk;
+    input wire pc_en;
     input wire [DWIDTH-1:0] pc_in, immgen_in, alu_in;
     input wire [1:0] pc_select;
     input wire comparator
@@ -37,19 +38,23 @@ module PC_controller(clk, pc_in, immgen_in, alu_in, pc_select, pc_value, compara
     
     always @(posedge clk)
     begin
-        if(pc_select == `PCADD4)
-        begin
-            pc_value <= pc_in + 4'h4;
-        end
-        
-        else if(pc_select == `IMMGEN || comparator)
-        begin
-            pc_value <= pc_in + immgen_in;
-        end
-        
-       else if(pc_select == `ALU)
-       begin
-            pc_value <= pc_in + alu_in;
-       end   
+        if(pc_en)
+            begin
+                if(pc_select == `PCADD4)
+                begin
+                    pc_value <= pc_in + 4'h4;
+                end
+                
+                else if(pc_select == `IMMGEN || comparator)
+                begin
+                    pc_value <= pc_in + immgen_in;
+                end
+                
+                else if(pc_select == `ALU)
+                begin
+                    pc_value <= pc_in + alu_in;
+                end  
+                else pc_value <= pc_in + 4'h4;
+            end
     end
 endmodule
