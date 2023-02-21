@@ -1,7 +1,8 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
+// Company: University of Portland 
 // Engineer: Nick Markels
+// Engineer: Jude Gabriel 
 // 
 // Create Date: 02/09/2023 03:46:21 PM
 // Design Name: 
@@ -20,15 +21,80 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Data_path();
+module Data_path(clk, reset, regWrite, aluSrc, ramRdEn, ramWrEn, isByte, isHalf, isWord, memToReg);
 
 
 //Parameters
 parameter DWIDTH = 32;
 
-wire rd_addA, rd_addrB, wr_addr, wr_data;
+/******* Data Path Inputs ******/
+
+// Clock Signal 
+input wire clk;
+
+// Reset Signal 
+input wire reset;
+
+// Controller Inputs 
+input wire regWrite;        // Write Signal for the Register File 
+input wire aluSrc;          // Selects the second input for the ALU 
+input wire ramRdEn;         // Read Enable for the Ram
+input wire ramWrEn;         // Write Enable for the Ram 
+input wire isByte;          // Read Byte from Ram
+input wire isHalf;          // Read Half from Ram
+input wire isWord;          // Read Word from Ram 
+input wire memToReg;        // Select Signal for ALU or Data Mem 
+
+/******* Internal Wires ******/ 
+
+// Program Counter Output 
+wire [DWIDTH-1:0] pcOut;
+
+// Instruction Register Output 
+wire [DWIDTH-1:0] irOut;
+
+// Register File Outputs 
+wire [DWIDTH-1:0] regFileOut1;
+wire [DWIDTH-1:0] regFileOut2;
+
+// Immediate Generator Output
+wire [DWIDTH-1:0] imGenOut;
+
+// ALU Controller to ALU 
+wire [DWIDTH-1:0] aluOp; 
+
+// ALU Input 
+wire [DWIDTH-1:0] aluInput2;
+
+// ALU Output 
+wire [DWIDTH-1:0] aluOut;
+
+// Data Memory Output 
+wire [DWIDTH-1:0] dataMemOut;
 
 
+// Data Memory/ALU Mux output
+wire [DWIDTH-1:0] dataMemALUOut;
+
+
+
+/****** Data Path ******/ 
+
+// Instruction Memory 
+instruction_memory ir(irOut, pcOut, clk, reset);
+
+// Register File 
+assign dataMemALUOut = memToReg ? dataMemOut : aluOut;
+registerfile    rf1(clk, irOut[19:15], irOut[24:20], irOut[11:7], dataMemALUOut, regWrite, regFileOut1, regFileOut2);
+
+// ALU and ALU Controller 
+alu_controller  ac1({irOut[30], irOut[14:12], irOut[6:0]}, aluOp);
+immGen          ig1(irOut, immGenOut);
+assign aluInput2 = aluSrc ? immGenOut : regFileOut2;
+alu             alu1(aluOut, aluOp, regFileOut1, aluInput2);
+
+// Data Memory 
+RAM r1(regFileOut2, dataMemOut, ramRdEn, ramWrEn, aluOut, isByte, isHalf, isWord, clk);
 
 
 endmodule

@@ -25,19 +25,19 @@
 module alu_controller(instruction, aluop);
 
 // Width of instruction and control signals 
-parameter IWIDTH = 32;
+parameter IWIDTH = 11;
 parameter AWIDTH = 4;
 
 output reg [AWIDTH-1:0] aluop;
 input  [IWIDTH-1:0] instruction;
 
 // R type definitons 
-wire [3:0] func3 = instruction[14:12];
-wire       func7 = instruction[30];
+wire [3:0] func3 = instruction[9:7];
+wire       func7 = instruction[10];
 
 always @(*)
     begin 
-        case(instruction)
+        case(instruction[6:0])
             `RTYPE:
                 case(func3)
                     `RADDSUB:
