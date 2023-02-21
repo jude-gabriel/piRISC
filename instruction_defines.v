@@ -19,6 +19,8 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+
+//Opcodes
 `define RTYPE      7'b0110011
 `define ITYPE      7'b0010011
 `define LOADTYPE   7'b0000011
@@ -28,3 +30,12 @@
 `define JALRTYPE   7'b1100111
 `define LUITYPE    7'b0110111
 `define AUIPCTYPE  7'b0010111
+
+
+//func3
+`define BEQ        3'h0
+`define BNE        3'h1
+`define BLT        3'h4
+`define BGE        3'h5
+`define BLTU       3'h6
+`define BGEU       3'h7
