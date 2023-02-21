@@ -26,7 +26,5 @@ module comparator(rs1, rs2, func3, branch, comparator);
         end
         else output <= 1'b0;
     end
-
-
-
+    assign comparator = output;
 endmodule
