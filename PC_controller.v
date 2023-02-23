@@ -1,7 +1,8 @@
-`timescale 1ns / 1ps
+`timescale 1ns / 1ns
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: Nick Markels
+// Engineer: Jude Gabriel 
 // 
 // Create Date: 02/09/2023 02:45:58 PM
 // Design Name: 
@@ -20,37 +21,54 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module PC_controller(clk, pc_in, pc_en, immgen_in, alu_in, pc_select, pc_value, comparator);
-
+module PC_controller(clk, reset, pc_in, pc_en, immgen_in, alu_in, pc_select, pc_value, comparator);
+    
     // Operations for PC
-    `define PCADD4 2'b00
-    `define IMMGEN 2'b01
-    `define ALU    2'b10
+    `define NORMALOP 2'b00
+    `define BRANCHING 2'b01
+    `define JAL    2'b10
+    `define JALR   2'b11
+    
+    // Signal Width 
     parameter DWIDTH = 32;
      
     input wire clk;
+    input wire reset;
     input wire pc_en;
     input wire [DWIDTH-1:0] pc_in, immgen_in, alu_in;
     input wire [1:0] pc_select;
-    input wire comparator
+    input wire comparator;
     output reg [DWIDTH-1:0] pc_value;
-
+    
+    always @(posedge reset)
+        begin 
+            pc_value <= 4'h0;
+        end 
     
     always @(posedge clk)
     begin
         if(pc_en)
             begin
-                if(pc_select == `PCADD4)
+                if(pc_select == `NORMALOP)
                 begin
                     pc_value <= pc_in + 4'h4;
                 end
-                
-                else if(pc_select == `IMMGEN || comparator)
+                else if(pc_select == `BRANCHING)
                 begin
-                    pc_value <= pc_in + immgen_in;
-                end
-                
-                else if(pc_select == `ALU)
+                    if(comparator)
+                        begin
+                             pc_value <= pc_in + immgen_in;
+                        end
+                    else
+                        begin 
+                            pc_value <= pc_in + 4'h4;
+                        end 
+                end              
+                else if(pc_select == `JAL)
+                    begin 
+                        pc_value <= pc_in + immgen_in;
+                    end               
+                else if(pc_select == `JALR)
                 begin
                     pc_value <= pc_in + alu_in;
                 end  

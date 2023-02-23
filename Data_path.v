@@ -21,7 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Data_path(clk, reset, regWrite, aluSrc, ramRdEn, ramWrEn, isByte, isHalf, isWord, memToReg);
+module Data_path(clk, reset, pcEn, pcSelect, regWrite, aluSrc, ramRdEn, ramWrEn, isByte, isHalf, isWord, memToReg);
 
 
 //Parameters
@@ -36,14 +36,16 @@ input wire clk;
 input wire reset;
 
 // Controller Inputs 
-input wire regWrite;        // Write Signal for the Register File 
-input wire aluSrc;          // Selects the second input for the ALU 
-input wire ramRdEn;         // Read Enable for the Ram
-input wire ramWrEn;         // Write Enable for the Ram 
-input wire isByte;          // Read Byte from Ram
-input wire isHalf;          // Read Half from Ram
-input wire isWord;          // Read Word from Ram 
-input wire memToReg;        // Select Signal for ALU or Data Mem 
+input wire pcEn;                  // Enable for the Program Counter
+input wire [1:0] pcSelect;        // Select signal for PC operation
+input wire regWrite;              // Write Signal for the Register File 
+input wire aluSrc;                // Selects the second input for the ALU 
+input wire ramRdEn;               // Read Enable for the Ram
+input wire ramWrEn;               // Write Enable for the Ram 
+input wire isByte;                // Read Byte from Ram
+input wire isHalf;                // Read Half from Ram
+input wire isWord;                // Read Word from Ram 
+input wire memToReg;              // Select Signal for ALU or Data Mem 
 
 /******* Internal Wires ******/ 
 
@@ -58,10 +60,13 @@ wire [DWIDTH-1:0] regFileOut1;
 wire [DWIDTH-1:0] regFileOut2;
 
 // Immediate Generator Output
-wire [DWIDTH-1:0] imGenOut;
+wire [DWIDTH-1:0] immGenOut;
+
+// Comparator Output
+wire comparatorOut;
 
 // ALU Controller to ALU 
-wire [DWIDTH-1:0] aluOp; 
+wire [3:0] aluOp; 
 
 // ALU Input 
 wire [DWIDTH-1:0] aluInput2;
@@ -80,12 +85,18 @@ wire [DWIDTH-1:0] dataMemALUOut;
 
 /****** Data Path ******/ 
 
+// Program Counter 
+PC_controller pc(clk, reset, pcOut, pcEn, immGenOut, aluOut, pcSelect, pcOut, comparatorOut);
+ 
 // Instruction Memory 
 instruction_memory ir(irOut, pcOut, clk, reset);
 
 // Register File 
 assign dataMemALUOut = memToReg ? dataMemOut : aluOut;
-registerfile    rf1(clk, irOut[19:15], irOut[24:20], irOut[11:7], dataMemALUOut, regWrite, regFileOut1, regFileOut2);
+registerfile    rf1(clk, reset, irOut[19:15], irOut[24:20], irOut[11:7], dataMemALUOut, regWrite, regFileOut1, regFileOut2);
+
+// Comparator 
+comparator c1(comparatorOut, irOut[19:15], irOut[24:20], irOut[6:0]);
 
 // ALU and ALU Controller 
 alu_controller  ac1({irOut[30], irOut[14:12], irOut[6:0]}, aluOp);
