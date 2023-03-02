@@ -93,10 +93,7 @@ instruction_memory ir(irOut, pcOut, clk, reset);
 
 // Register File 
 //assign dataMemALUOut = memToReg ? dataMemOut : aluOut;
-assign dataMemALUOut = (memToReg == 2'b00) ? aluOut :
-                       (memToReg == 2'b01) ? dataMemOut :
-                       (memToReg == 2'b10) ? pcOut :
-                       (memToReg == 2'b11) ? immGenOut ;
+assign dataMemALUOut = memToReg[1] ? (memToReg[0]? immGenOut : pcOut) : (memToReg[0] ? dataMemOut : aluOut);
 
 registerfile    rf1(clk, reset, irOut[19:15], irOut[24:20], irOut[11:7], dataMemALUOut, regWrite, regFileOut1, regFileOut2);
 
