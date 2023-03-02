@@ -45,7 +45,7 @@ input wire ramWrEn;               // Write Enable for the Ram
 input wire isByte;                // Read Byte from Ram
 input wire isHalf;                // Read Half from Ram
 input wire isWord;                // Read Word from Ram 
-input wire memToReg;              // Select Signal for ALU or Data Mem 
+input wire [1:0] memToReg;              // Select Signal for ALU or Data Mem 
 
 /******* Internal Wires ******/ 
 
@@ -92,7 +92,12 @@ PC_controller pc(clk, reset, pcOut, pcEn, immGenOut, aluOut, pcSelect, pcOut, co
 instruction_memory ir(irOut, pcOut, clk, reset);
 
 // Register File 
-assign dataMemALUOut = memToReg ? dataMemOut : aluOut;
+//assign dataMemALUOut = memToReg ? dataMemOut : aluOut;
+assign dataMemALUOut = (memToReg == 2'b00) ? aluOut :
+                       (memToReg == 2'b01) ? dataMemOut :
+                       (memToReg == 2'b10) ? pcOut :
+                       (memToReg == 2'b11) ? immGenOut ;
+
 registerfile    rf1(clk, reset, irOut[19:15], irOut[24:20], irOut[11:7], dataMemALUOut, regWrite, regFileOut1, regFileOut2);
 
 // Comparator 
