@@ -46,7 +46,7 @@ input wire isByte;                // Read Byte from Ram
 input wire isHalf;                // Read Half from Ram
 input wire isWord;                // Read Word from Ram 
 input wire [1:0] memToReg;              // Select Signal for ALU or Data Mem 
-output reg [DWIDTH-1:0] viewAlu  //output to view alu
+output wire [DWIDTH-1:0] viewAlu;  //output to view alu
 
 /******* Internal Wires ******/ 
 
@@ -110,7 +110,7 @@ alu             alu1(aluOut, aluOp, regFileOut1, aluInput2);
 // Data Memory 
 RAM r1(regFileOut2, dataMemOut, ramRdEn, ramWrEn, aluOut, isByte, isHalf, isWord, clk);
 
-assign viewAlu = aluOut
+assign viewAlu = aluOut;
 
 
 endmodule
