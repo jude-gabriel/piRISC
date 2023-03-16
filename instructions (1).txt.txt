@@ -1,0 +1,7 @@
+Load immediates into RAM 
+LB()
+LH()
+
+
+
+ADD(2, 0, 1);

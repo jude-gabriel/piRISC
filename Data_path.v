@@ -21,7 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Data_path(clk, reset, pcEn, pcSelect, regWrite, aluSrc, ramRdEn, ramWrEn, isByte, isHalf, isWord, memToReg);
+module Data_path(clk, reset, pcEn, pcSelect, regWrite, aluSrc, ramRdEn, ramWrEn, isByte, isHalf, isWord, memToReg, viewAlu);
 
 
 //Parameters
@@ -45,7 +45,8 @@ input wire ramWrEn;               // Write Enable for the Ram
 input wire isByte;                // Read Byte from Ram
 input wire isHalf;                // Read Half from Ram
 input wire isWord;                // Read Word from Ram 
-input wire memToReg;              // Select Signal for ALU or Data Mem 
+input wire [1:0] memToReg;              // Select Signal for ALU or Data Mem 
+output wire [DWIDTH-1:0] viewAlu;  //output to view alu
 
 /******* Internal Wires ******/ 
 
@@ -92,7 +93,9 @@ PC_controller pc(clk, reset, pcOut, pcEn, immGenOut, aluOut, pcSelect, pcOut, co
 instruction_memory ir(irOut, pcOut, clk, reset);
 
 // Register File 
-assign dataMemALUOut = memToReg ? dataMemOut : aluOut;
+//assign dataMemALUOut = memToReg ? dataMemOut : aluOut;
+assign dataMemALUOut = memToReg[1] ? (memToReg[0]? immGenOut : pcOut) : (memToReg[0] ? dataMemOut : aluOut);
+
 registerfile    rf1(clk, reset, irOut[19:15], irOut[24:20], irOut[11:7], dataMemALUOut, regWrite, regFileOut1, regFileOut2);
 
 // Comparator 
@@ -106,6 +109,8 @@ alu             alu1(aluOut, aluOp, regFileOut1, aluInput2);
 
 // Data Memory 
 RAM r1(regFileOut2, dataMemOut, ramRdEn, ramWrEn, aluOut, isByte, isHalf, isWord, clk);
+
+assign viewAlu = aluOut;
 
 
 endmodule
