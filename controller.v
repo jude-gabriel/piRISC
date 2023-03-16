@@ -86,7 +86,16 @@ integer jalr_done;          // Tells the controller the JALR Type FSM is done
 always @(posedge reset)
     begin 
         // Outputs 
-
+        pcEn = 0;
+        pc_select = 2'b0;
+        aluSrc = 0;
+        regWrite = 0;
+        memToReg = 2'b0;
+        isByte = 0;
+        isHalf = 0;
+        isWord = 0;
+        memRead = 0;
+        memWrite = 0;
 
         // Go Flags 
         go_rtype        = 0;
