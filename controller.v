@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`include "instruction_defines.v"
 //////////////////////////////////////////////////////////////////////////////////
 // Company: University of Portland
 // Engineer: Jude Gabriel
@@ -19,9 +20,10 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module controller(pcEn, pc_select, aluSrc, regWrite, memToReg, isByte, isHalf, isWord, memRead, memWrite, instruction, comparator, clk, reset);
+module controller(irEn, pcEn, pc_select, aluSrc, regWrite, memToReg, isByte, isHalf, isWord, memRead, memWrite, go_contr, instruction, comparator, clk, reset);
 
 //------ OUTPUTS FROM CPU ------/
+output reg       irEn;        // Enables the instruction register to fetch
 output reg       pcEn;        // Enables the program counter to update
 output reg [1:0] pc_select;   // Selects the program counter 
 output reg       aluSrc;      // Select line for ALU input b
@@ -44,22 +46,40 @@ input        reset;
 //-------- Bits from Inputs -------//
 wire [6:0] func7;
 wire [2:0] func3;
+wire [6:0] opcode;
 assign func7 = instruction[31:25];
 assign func3 = instruction[14:12];
+assign opcode = instruction[6:0];
 
 
 //------ TYPEDEFS FOR STATES -------//
-typedef enum {R_S0, R_S1, R_S2} r_state_t;                          // RTYPE States
-typedef enum {I_S0, I_S1, I_S2} i_state_t;                          // ITYPE States
-typedef enum {L_S0, L_S1, L_S2, L_S3, L_S4, L_S5} l_state_t;        // Load States  
-typedef emum {S_S0, S_S1, S_S3, S_S4} s_state_t;                    // Store States
-typedef enum {B_S0, B_S1, B_S2, B_S3} b_state_t;                    // Branching States 
-typedef enum {JAL_S0, JAL_S1, JAL_S2} jal_state_t;                  // JAL States
-typedef emum {JALR_S0, JALR_S1, JALR_S2} jalr_state_t;              // JALR States
+typedef enum {C_S0, C_S1, C_S2, C_S3, C_S4, C_S5, C_S6, C_S7} contr_state_t;                    // Main controller states
+typedef enum {F_S0, F_S1, F_S2} fetch_state_t;                          // Instruction Fetch States
+typedef enum {P_S0, P_S1, P_S2} pc_state_t;                             // Program counter update states
+typedef enum {D_S0, D_S1, D_S2, D_S3, D_S4, D_S5, D_S6, D_S7, D_S8, D_S9, D_S10, D_S11, D_S12, D_S13, D_S14, D_S15} decode_state_t;  // Decode States
+typedef enum {R_S0, R_S1, R_S2} r_state_t;                              // RTYPE States
+typedef enum {I_S0, I_S1, I_S2} i_state_t;                              // ITYPE States
+typedef enum {L_S0, L_S1, L_S2, L_S3, L_S4, L_S5} l_state_t;            // Load States  
+typedef emum {S_S0, S_S1, S_S3, S_S4} s_state_t;                        // Store States
+typedef enum {B_S0, B_S1, B_S2, B_S3} b_state_t;                        // Branching States 
+typedef enum {JAL_S0, JAL_S1, JAL_S2} jal_state_t;                      // JAL States
+typedef emum {JALR_S0, JALR_S1, JALR_S2} jalr_state_t;                  // JALR States
 
 
 
 //----- FLAGS -------// 
+input   go_contr;           // Tells the controller to start
+integer contr_done;          // Instruction finished
+
+integer go_fetch;           // Tells the Fetch FSM to start
+integer fetch_done;         // Tells the controller the Fetch FSM is done
+
+integer go_pc;              // Tells the PC Update FSM to start
+integer pc_done;            // Tells the controller the PC Update FSM is done
+
+integer go_decode;          // Tells the decode FSM to start
+integer decode_done;        // Tells the controller the Decode FSM is done
+
 integer go_rtype;           // Tells RTYPE FSM to start
 integer rtype_done;         // Tells controller RTYPE FSM is done 
 
@@ -86,18 +106,22 @@ integer jalr_done;          // Tells the controller the JALR Type FSM is done
 always @(posedge reset)
     begin 
         // Outputs 
-        pcEn = 0;
-        pc_select = 2'b0;
-        aluSrc = 0;
-        regWrite = 0;
-        memToReg = 2'b0;
-        isByte = 0;
-        isHalf = 0;
-        isWord = 0;
-        memRead = 0;
-        memWrite = 0;
+        irEn            = 0;
+        pcEn            = 0;
+        pc_select       = 2'b0;
+        aluSrc          = 0;
+        regWrite        = 0;
+        memToReg        = 2'b0;
+        isByte          = 0;
+        isHalf          = 0;
+        isWord          = 0;
+        memRead         = 0;
+        memWrite        = 0;
 
         // Go Flags 
+        go_fetch        = 0;
+        go_pc           = 0;
+        go_decode       = 0;
         go_rtype        = 0;
         go_itype        = 0;
         go_ltype        = 0;
@@ -105,6 +129,352 @@ always @(posedge reset)
         go_branching    = 0;
         go_jal          = 0;
         go_jalr         = 0;
+    end
+
+//-------- Main Controller -------//
+contr_state_t curr_contr, next_contr;
+always @(posedge clk or posedge reset)
+    begin 
+        if(reset)
+            begin 
+                curr_contr = C_S0;
+                next_contr = C_S0;
+            end
+        else
+            curr_contr = next_contr;
+
+        if(go_contr)
+            begin 
+                case(curr_contr)
+                    
+                    // Check if we are good to go 
+                    C_S0:
+                        begin 
+                            next_contr = (go_contr) ? C_S1 : C_S0;
+                            contr_done = 0;
+                        end
+
+                    // Fetch the first operation 
+                    C_S1:
+                        begin 
+                            go_fetch = 1;
+                            next_contr = C_S2;
+                            contr_done = 0;
+                        end 
+                    
+                    // Check if fetch is completed
+                    C_S2:
+                        begin 
+                            next_contr = (fetch_done) ? C_S3 : C_S2;
+                            contr_done = 0;
+                        end 
+                    
+                    // Update the PC 
+                    C_S3:
+                        begin
+                            go_fetch = 0;
+                            go_pc = 1;
+                            next_contr = C_S4;
+                            contr_done = 0;
+                        end
+
+                    // Check if PC is done updating
+                    C_S4:
+                        begin 
+                            next_contr = (pc_done) ? C_S5 : C_S4;
+                            contr_done = 0;
+                        end 
+
+                    // Decode operations
+                    C_S5:
+                        begin 
+                            go_pc = 0;
+                            go_decode = 1;
+                            next_contr = C_S6;
+                            contr_done = 0;
+                        end
+
+                    // Check if decode is done
+                    C_S6:
+                        begin 
+                            next_contr = (decode_done) ? C_S7 : C_S6;
+                            contr_done = 0;
+                        end 
+
+                    // Mark the FSM as complete and restart
+                    C_S7:
+                        begin 
+                            go_fetch        = 0;
+                            go_pc           = 0;
+                            go_decode       = 0;
+                            go_rtype        = 0;
+                            go_itype        = 0;
+                            go_ltype        = 0;
+                            go_stype        = 0;
+                            go_branching    = 0;
+                            go_jal          = 0;
+                            go_jalr         = 0;
+                            contr_done      = 1;
+                            next_contr      = C_S0;
+                        end
+
+                    // Default case
+                    default:
+                        begin 
+                            next_contr = curr_contr;
+                            contr_done = 0;
+                        end
+                endcase
+            end 
+    end 
+
+
+//-------- Fetch FSM -------//
+fetch_state_t curr_fetch, next_fetch;
+always @(posedge clk or posedge reset)
+    begin
+        if(reset)
+        begin 
+            curr_fetch = F_S0;
+            next_fetch = F_S0
+        end 
+        else
+            curr_fetch = next_fetch;
+
+        if(go_fetch)
+            begin
+                case(curr_fetch)
+                    F_S0:
+                        begin 
+                            next_fetch = (go_fetch) ? F_S1 : F_S0;
+                            irEn = 0;
+                            fetch_done = 0;
+                        end
+                    F_S1:
+                        begin
+                            irEn = 1;
+                            fetch_done = 0;
+                            next_fetch = F_S2;
+                        end
+                    F_S2:
+                        begin 
+                            irEn = 0;
+                            fetch_done = 1
+                            go_fetch = 0;
+                            next_fetch = F_S0;
+                        end
+                    default:
+                        begin 
+                            next_fetch = curr_fetch;
+                            fetch_done = 0;
+                        end
+                endcase
+            end
+    end 
+
+
+//-------- PC Update FSM ------//
+pc_state_t curr_pc, nect_pc;
+always @(posedge clk or reset)
+    begin 
+        if(reset)
+            begin 
+                curr_pc = P_S0;
+                next_pc = P_S0;
+            end
+        else    
+            curr_pc = next_pc;
+
+        if(go_pc)
+            begin 
+                case(curr_pc)
+                    P_S0:
+                        begin 
+                            next_pc = (go_pc) ? P_S1 : P_S0;
+                            pcEn = 0;
+                            pc_select = 2'b0;
+                            pc_done = 0;
+                        end
+                    P_S1:
+                        begin 
+                            pc_select = 2'b0;
+                            pcEn = 1;
+                            pc_done = 0;
+                            next_pc = P_S2;
+                        end 
+                    P_S2:
+                        begin 
+                            pcEn = 0;
+                            pc_select = 2'b0;
+                            pc_done = 1;
+                            go_pc = 0;
+                            next_pc = P_S0;
+                        end
+                    default:
+                        begin 
+                            next_pc = curr_pc;
+                            pc_done = 0;
+                        end 
+                endcase
+            end 
+    end
+
+
+
+//------ Decode FSM -----//
+decode_state_t curr_decode, next_decode;
+always @(posedge clk or posedge reset)
+    begin 
+        if(reset)
+            begin 
+                curr_decode = D_S0;
+                next_decode = D_S0;
+            end 
+        else    
+            curr_decode = next_decode;
+
+        if(go_decode)
+            begin 
+                case(curr_decode)
+                    D_S0:
+                        begin
+                            if(go_decode)
+                                begin 
+                                    case(opcode)
+                                        'RTYPE:
+                                            next_decode = D_S1;
+                                        'ITYPE:
+                                            next_decode = D_S3;
+                                        'LOADTYPE:
+                                            next_decode = D_S5;
+                                        'STYPE:
+                                            next_decode = D_S7;
+                                        'BTYPE:
+                                            next_decode = D_S9;
+                                        'JTYPE:
+                                            next_decode = D_S11;
+                                        'JALRTYPE:
+                                            next_decode = D_S_13;
+                                    go_decode = 0;
+                                end
+                        end
+                    
+                    // Trigger RTYPE FSM and check if it is finished
+                    D_S1:
+                        begin 
+                            go_rtype = 1;
+                            next_decode = D_S2;
+                            decode_done = 0;
+                        end
+                    D_S2:
+                        begin 
+                            next_decode = (rtype_done) ? D_S15 : D_S2;
+                            decode_done = 0;
+                        end
+
+                    // Trigger ITYPE FSM and check if it is finished
+                    D_S3:
+                        begin 
+                            go_itype = 1;
+                            next_decode = D_S4;
+                            decode_done = 0;
+                        end 
+                    D_S4:
+                        begin
+                            next_decode = (itype_done) ? D_S15 : D_S4;
+                            decode_done = 0;
+                        end
+
+                    // Trigger LOADTYPE FSM and check if it is finished
+                    D_S5:
+                        begin
+                            go_ltype = 1;
+                            next_decode = D_S6;
+                            decode_done = 0;
+                        end
+                    D_S6:
+                        begin 
+                            next_decode = (ltype_done) ? D_S15 : D_S6;
+                            decode_done = 0;
+                        end 
+
+                    // Trigger STORETYPE FSM and check if it is finished
+                    D_S7:
+                        begin 
+                            go_stype = 1;
+                            next_decode = D_S8;
+                            decode_done = 0;
+                        end 
+                    D_S8:
+                        begin 
+                            next_decode = (stype_done) ? D_S15 : D_S8;
+                            decode_done = 0;
+                        end
+
+                    // Trigger BRANCHING FSM and check if it is finished
+                    D_S9:
+                        begin 
+                            go_branching = 1;
+                            next_decode = D_S10;
+                            decode_done = 0;
+                        end 
+                    D_S10:
+                        begin 
+                            next_decode = (branching_done) ? D_S15 : D_S10;
+                            decode_done = 0;
+                        end
+
+                    // Trigger JAL FSM and check if it is finished
+                    D_S11:
+                        begin 
+                            go_jal = 1;
+                            next_decode = D_S12;
+                            decode_done = 0;
+                        end 
+                    D_S12:
+                        begin 
+                            next_decode = (jal_done) ? D_S15 : D_S12;
+                            decode_done = 0;
+                        end
+
+                    // Trigger JALR FSM and check if it is finished
+                    D_S13:
+                        begin 
+                            go_jalr = 1;
+                            next_decode = D_S14;
+                            decode_done = 0;
+                        end
+                    D_S14:
+                        begin 
+                            next_decode = (jalr_done) ? D_S15 : D_S14;
+                            decode_done = 0;
+                        end
+
+                    // Mark Decode as done
+                    D_S15:
+                        begin 
+                            next_decode = D_S0;
+                            go_rtype        = 0;
+                            go_itype        = 0;
+                            go_ltype        = 0;
+                            go_stype        = 0;
+                            go_branching    = 0;
+                            go_jal          = 0;
+                            go_jalr         = 0;
+                            go_decode       = 0;
+                            decode_done     = 1;
+                        end 
+
+                    // Default Case
+                    default:
+                        begin 
+                            next_decode = curr_decode;
+                            decode_done = 0;
+                        end
+                endcase
+            end
+    end 
+
 
 
 
@@ -145,6 +515,7 @@ always @(posedge clk or posedge reset)
                             next_rtype = R_S0;
                             regWrite = 0;
                             rytpe_done = 1;
+                            go_rtype = 0;
                         end 
                     
                     // Default case 
@@ -198,6 +569,7 @@ always @(posedge clk or posedge reset)
                             next_itype = I_S0;
                             regWrite = 0;
                             itype_done = 1;
+                            go_itype = 0;
                         end 
 
                     // Default case 
@@ -287,6 +659,7 @@ always @(posedge clk or posedge reset)
                             aluSrc = 0;
                             memToReg = 2'b0;
                             ltype_done = 1;
+                            go_ltype = 0;
                         end 
 
                     default:
@@ -312,12 +685,12 @@ always @(posedge clk or posedge reset)
         else 
             curr_stype = next_stype;
 
-        if(go_store)
+        if(go_stype)
             begin 
                 case(curr_stype)
                     S_S0:
                         begin 
-                            if(go_store)
+                            if(go_stype)
                                 begin 
                                     if(func3 == 3'h0x0)
                                         begin
@@ -366,6 +739,7 @@ always @(posedge clk or posedge reset)
                             aluSrc = 0;
                             stype_done = 1;
                             next_stype = S_S0;
+                            go_stype = 0;
                         end
                     default:
                         begin 
@@ -421,6 +795,7 @@ always @(posedge clk or posedge reset)
                             pcEn = 0;
                             pc_select = 2'b0;
                             branching_done = 1;
+                            go_branching = 0;
                         end 
                     default:
                         begin 
@@ -471,6 +846,7 @@ always @(posedge clk or posedge reset)
                             pcEn = 0;
                             jal_done = 1;
                             next_jal = JAL_S0;
+                            go_jal = 0;
                         end 
                     default:
                         begin 
@@ -521,6 +897,7 @@ always @(posedge clk or posedge reset)
                             memToReg = 2'b0;
                             jalr_done = 1;
                             next_jalr = JALR_S0;
+                            go_jalr = 0;
                         end
                     default:
                         begin 
@@ -530,9 +907,4 @@ always @(posedge clk or posedge reset)
                 endcase
             end
     end
-
-
-
-
-
 endmodule
