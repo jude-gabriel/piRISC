@@ -21,7 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Data_path(clk, reset, pcEn, pcSelect, regWrite, aluSrc, ramRdEn, ramWrEn, isByte, isHalf, isWord, memToReg, viewAlu);
+module Data_path(clk, reset, pcEn, pcSelect, regWrite, aluSrc, ramRdEn, ramWrEn, isByte, isHalf, isWord, memToReg, viewAlu, comparatorOut, irOut);
 
 
 //Parameters
@@ -54,7 +54,7 @@ output wire [DWIDTH-1:0] viewAlu;  //output to view alu
 wire [DWIDTH-1:0] pcOut;
 
 // Instruction Register Output 
-wire [DWIDTH-1:0] irOut;
+output wire [DWIDTH-1:0] irOut;
 
 // Register File Outputs 
 wire [DWIDTH-1:0] regFileOut1;
@@ -64,7 +64,7 @@ wire [DWIDTH-1:0] regFileOut2;
 wire [DWIDTH-1:0] immGenOut;
 
 // Comparator Output
-wire comparatorOut;
+output wire comparatorOut;
 
 // ALU Controller to ALU 
 wire [3:0] aluOp; 
