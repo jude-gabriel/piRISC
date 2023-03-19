@@ -113,17 +113,27 @@ always @(posedge reset)
         memRead         = 0;
         memWrite        = 0;
 
-        // Go Flags 
+        // Flags 
         go_fetch        = 0;
+        fetch_done      = 0;
         go_pc           = 0;
+        pc_done         = 0;
         go_decode       = 0;
+        decode_done     = 0;
         go_rtype        = 0;
+        rtype_done      = 0;
         go_itype        = 0;
+        itype_done      = 0;
         go_ltype        = 0;
+        ltype_done      = 0;
         go_stype        = 0;
+        stype_done      = 0;
         go_branching    = 0;
+        branching_done  = 0;
         go_jal          = 0;
+        jal_done        = 0;
         go_jalr         = 0;
+        jalr_done       = 0;
     end
 
 //-------- Main Controller -------//

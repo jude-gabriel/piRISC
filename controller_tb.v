@@ -41,55 +41,91 @@ controller contr(irEn, pcEn, pc_select, aluSrc, regWrite, memToReg, isByte, isHa
 // Main Tests
 initial
     begin
-        // R-Type
-//        reset = 1;
-//        #20 reset = 0; go_contr = 0;
-//        #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b0110011;
-//        #20 go_contr = 1;
-//        #1000 $stop;
-        
-        // I-Type
+//         R-Type
         reset = 1;
         #20 reset = 0; go_contr = 0;
         #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b0110011;
         #20 go_contr = 1;
-        #1000 $stop;
+        
+//         I-Type
+        #500 reset = 1;
+        #20 reset = 0; go_contr = 0;
+        #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b0010011;
+        #20 go_contr = 1;
 
-        // // Load Type
-        // reset = 1;
-        // #20 reset = 0; go_contr = 0;
-        // #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b0110011;
-        // #20 go_contr = 1;
-        // #1000 $stop;
+//          Load Type Byte
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b0000011;
+         #20 go_contr = 1;
 
-        // // Store Type
-        // reset = 1;
-        // #20 reset = 0; go_contr = 0;
-        // #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b0110011;
-        // #20 go_contr = 1;
-        // #1000 $stop;
+         // Load Type Byte Unsigned
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b100; opcode = 7'b0000011;
+         #20 go_contr = 1;
 
+         // Load Type Half
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b001; opcode = 7'b0000011;
+         #20 go_contr = 1;
 
-        // // Branching Type
-        // reset = 1;
-        // #20 reset = 0; go_contr = 0;
-        // #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b0110011;
-        // #20 go_contr = 1;
-        // #1000 $stop;
+         // Load Type Half Unsigned
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b101; opcode = 7'b0000011;
+         #20 go_contr = 1;
 
-        // // JAL Type
-        // reset = 1;
-        // #20 reset = 0; go_contr = 0;
-        // #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b0110011;
-        // #20 go_contr = 1;
-        // #1000 $stop;
+//          Load Type Word
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b010; opcode = 7'b0000011;
+         #20 go_contr = 1;
+         
+//          Store Type Byte
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b0100011;
+         #20 go_contr = 1;
+         
+         // Store Type Half
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b001; opcode = 7'b0100011;
+         #20 go_contr = 1;
+         
+         //          Store Type Word
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b010; opcode = 7'b0100011;
+         #20 go_contr = 1;
+         
 
-        // // JALR Type
-        // reset = 1;
-        // #20 reset = 0; go_contr = 0;
-        // #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b0110011;
-        // #20 go_contr = 1;
-        // #1000 $stop;
+//          Branching Type
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b1100011; comparator = 0;
+         #20 go_contr = 1;
+                  
+//          Branching Type
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b1100011; comparator = 1;
+         #20 go_contr = 1;
+         
+//          JAL Type
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b1101111;
+         #20 go_contr = 1;
+         
+//          JALR Type
+         #500 reset = 1;
+         #20 reset = 0; go_contr = 0;
+         #20 func7 = 7'b0000000; func3 = 3'b000; opcode = 7'b1100111;
+         #20 go_contr = 1;
+         #1000 $stop;
         
     end
 
