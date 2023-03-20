@@ -70,6 +70,8 @@ always @(*)
                 endcase 
             `LOADTYPE:                     aluop <= `ALUADD;
             `STYPE:                        aluop <= `ALUADD;
+            `LUITYPE:                      aluop <= `ALUSHIFT;
+            `AUIPCTYPE:                    aluop <= `ALUSHIFTADD;
              default: aluop <= `ALUADD;
         
         endcase

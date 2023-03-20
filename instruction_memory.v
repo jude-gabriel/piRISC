@@ -52,6 +52,6 @@ always@(posedge reset)
 always@(posedge clk)
     begin 
         if(enable)
-            instructionOut <= mem[addressIn[7:2]];
+            instructionOut <= mem[addressIn[31:2]];
     end
 endmodule

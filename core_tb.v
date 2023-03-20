@@ -9,6 +9,13 @@ reg go_contr;
 
 // Outputs 
 wire viewAlu;
+wire [31:0] irOut;
+
+always @(irOut)
+    begin 
+        if(irOut == 32'hFFFFFFFF)
+            $stop;
+    end
 
 // Clock Signal
 initial 
@@ -18,7 +25,7 @@ initial
     end
 
 // Instantiate Model
-core core(viewAlu, clk, reset, go_contr);
+core core(viewAlu, irOut, clk, reset, go_contr);
 
 initial 
     begin

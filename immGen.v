@@ -75,6 +75,12 @@ always@(*)
              
              // JAL Type
              `JALRTYPE: immGenOUT <= {{21{instruction[31]}}, instruction[30:20]};
+             
+             // LUI Type
+             `LUITYPE: immGenOUT <= {{10{instruction[31]}}, instruction[30:12]};
+             
+             // AUIPC Type
+             `AUIPCTYPE: immGenOUT <= {{10{instruction[31]}}, instruction[30:12]};    
         endcase
     end
 

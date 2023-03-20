@@ -1,6 +1,6 @@
 `timescale 1ns / 1ns
 
-module core(viewAlu, clk, reset, go_contr);
+module core(viewAlu, irOut, clk, reset, go_contr);
 
 parameter WIDTH = 32;
 
@@ -12,11 +12,11 @@ input go_contr; // Go signal for core
 
 // Sys outputs 
 output [WIDTH-1:0] viewAlu;
+output wire [WIDTH-1:0] irOut;
 
 
 // Data Path Outputs
 wire                comp;
-wire [WIDTH-1:0]    irOut;
 
 wire [6:0]          func7;
 wire [2:0]          func3;

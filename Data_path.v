@@ -106,7 +106,7 @@ comparator c1(comparatorOut, regFileOut1, regFileOut2, irOut[14:12]);
 alu_controller  ac1({irOut[30], irOut[14:12], irOut[6:0]}, aluOp);
 immGen          ig1(irOut, immGenOut);
 assign aluInput2 = aluSrc ? immGenOut : regFileOut2;
-alu             alu1(aluOut, aluOp, regFileOut1, aluInput2);
+alu             alu1(aluOut, aluOp, regFileOut1, aluInput2, pcOut);
 
 // Data Memory 
 RAM r1(regFileOut2, dataMemOut, ramRdEn, ramWrEn, aluOut, isByte, isHalf, isWord, irOut[14:12], clk);

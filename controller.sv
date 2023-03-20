@@ -373,6 +373,11 @@ always @(posedge clk or posedge reset)
                                                     next_decode = D_S11;
                                                 `JALRTYPE:
                                                     next_decode = D_S13;
+                                                `LUITYPE:
+                                                    next_decode = D_S3;
+                                                `AUIPCTYPE:
+                                                    next_decode = D_S3;
+                                                
                                             endcase
                                             decode_done = 0;
                                         end
@@ -519,6 +524,7 @@ always @(posedge clk or posedge reset)
                                 begin 
                                     next_rtype = (go_rtype) ? R_S1 : R_S0;
                                     aluSrc = 0;
+                                    memToReg = 2'b0;
                                     rtype_done = 0;
                                 end 
 
