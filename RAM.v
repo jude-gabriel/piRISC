@@ -23,7 +23,7 @@
 
 `timescale 1ns/1ns
 
-module RAM(wr_data, rd_data, rdEn, wrEn, addr, isByte, isHalf, isWord, clk);
+module RAM(wr_data, rd_data, rdEn, wrEn, addr, isByte, isHalf, isWord, func3, clk);
 
     //Parameters
     parameter DWIDTH = 32;
@@ -37,11 +37,12 @@ module RAM(wr_data, rd_data, rdEn, wrEn, addr, isByte, isHalf, isWord, clk);
     output reg [DWIDTH-1:0] rd_data;
     
     // Control Signals 
-    input wire isByte;
-    input wire isHalf;
-    input wire isWord;
-    input wire rdEn;
-    input wire wrEn;
+    input wire       isByte;
+    input wire       isHalf;
+    input wire       isWord;
+    input wire       rdEn;
+    input wire       wrEn;
+    input wire [2:0] func3;
     
     // Clock Signals 
     input clk;
@@ -74,11 +75,17 @@ module RAM(wr_data, rd_data, rdEn, wrEn, addr, isByte, isHalf, isWord, clk);
             begin 
                 if(isByte)
                     begin 
-                        rd_data <= {24'b0, mem[addr[7:2]][7:0]};
+                        if(func3 == 3'h0)
+                            rd_data <= {{24{mem[addr[7:2]][7]}}, mem[addr[7:2]][7:0]};
+                        if(func3 == 3'h4)
+                            rd_data <= {24'b0, mem[addr[7:2]][7:0]};
                     end 
                 else if(isHalf)
                     begin
-                        rd_data <= {16'b0, mem[addr[7:2]][15:0]};
+                        if(func3 == 3'h1)
+                            rd_data <= {{16{mem[addr[7:2]][15]}}, mem[addr[7:2]][15:0]};
+                        if(func3 == 3'h5)
+                            rd_data <= {16'b0, mem[addr[7:2]][15:0]};
                     end 
                 else if(isWord)
                     begin

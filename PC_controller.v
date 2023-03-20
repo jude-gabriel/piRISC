@@ -39,6 +39,8 @@ module PC_controller(clk, reset, pc_in, pc_en, immgen_in, alu_in, pc_select, pc_
     input wire [1:0] pc_select;
     input wire comparator;
     output reg [DWIDTH-1:0] pc_value;
+    wire signed [DWIDTH-1:0] immSigned = immgen_in;
+    wire signed [DWIDTH-1:0] aluSigned = alu_in;
     
     always @(posedge reset)
         begin 
@@ -57,16 +59,16 @@ module PC_controller(clk, reset, pc_in, pc_en, immgen_in, alu_in, pc_select, pc_
                 begin
                     if(comparator)
                         begin
-                             pc_value <= pc_in + immgen_in;
+                             pc_value <= pc_in + immSigned;
                         end
                 end              
                 else if(pc_select == `JAL)
                     begin 
-                        pc_value <= pc_in + immgen_in;
+                        pc_value <= pc_in + immSigned;
                     end               
                 else if(pc_select == `JALR)
                 begin
-                    pc_value <= pc_in + alu_in;
+                    pc_value <= pc_in + aluSigned;
                 end  
                 else pc_value <= pc_in + 4'h4;
             end

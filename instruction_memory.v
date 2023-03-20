@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module instruction_memory(instructionOut, addressIn, clk, reset);
+module instruction_memory(instructionOut, enable, addressIn, clk, reset);
 
 // Word depth and memeory depth 
 parameter DWIDTH = 32;
@@ -32,6 +32,9 @@ output reg [DWIDTH-1:0] instructionOut;
 
 // Next address of the instruction 
 input [DWIDTH-1:0] addressIn;
+
+// Enable signal
+input enable;
 
 // Clock signal 
 input clk; 
@@ -48,6 +51,7 @@ always@(posedge reset)
 
 always@(posedge clk)
     begin 
-        instructionOut <= mem[addressIn[7:2]];
+        if(enable)
+            instructionOut <= mem[addressIn[7:2]];
     end
 endmodule

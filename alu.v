@@ -45,14 +45,14 @@ wire signed [VAR_WIDTH-1:0] bSigned = b;
 always @(*)
     begin   
         case(opcode)
-            `ALUADD:    out <= a + b;
-            `ALUSUB:    out <= a - b;
-            `ALUXOR:    out <= a ^ b;
-            `ALUOR:     out <= a | b;
-            `ALUAND:    out <= a & b;
-            `ALUSLL:    out <= a << b;
-            `ALUSRL:    out <= a >> b;
-            `ALUSRA:    out <= a >>> b;
+            `ALUADD:    out <= aSigned + bSigned;
+            `ALUSUB:    out <= aSigned - bSigned;
+            `ALUXOR:    out <= aSigned ^ bSigned;
+            `ALUOR:     out <= aSigned | bSigned;
+            `ALUAND:    out <= aSigned & bSigned;
+            `ALUSLL:    out <= aSigned << bSigned;
+            `ALUSRL:    out <= aSigned >> bSigned;
+            `ALUSRA:    out <= aSigned >>> b;
             `ALUSLT:    out <= (aSigned < bSigned) ? 1:0;
             `ALUSLTU:   out <= (a < b) ? 1:0;
             default:    out <= 32'b0;

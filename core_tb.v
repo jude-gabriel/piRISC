@@ -24,7 +24,8 @@ initial
     begin
         #20 reset = 1;
         #20 reset = 0;
-        #1000 $stop;
+        #20 go_contr = 1;
+        #30000 $stop;
     end 
 
 endmodule

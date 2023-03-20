@@ -45,7 +45,7 @@ controller contr(irEn, pcEn, pc_select, aluSrc, regWrite, memToReg, isByte, isHa
 
 
 // Data Path
-Data_path dp(clk, reset, pcEn, pc_select, regWrite, aluSrc, memRead, memWrite, isByte, isHalf, isWord, memToReg, viewAlu, comp, irOut);
+Data_path dp(clk, reset, irEn, pcEn, pc_select, regWrite, aluSrc, memRead, memWrite, isByte, isHalf, isWord, memToReg, viewAlu, comp, irOut);
 
 
 endmodule

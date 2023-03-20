@@ -588,6 +588,7 @@ always @(posedge clk or posedge reset)
                             I_S2:
                                 begin 
                                     next_itype = I_S0;
+                                    aluSrc = 1;
                                     regWrite = 0;
                                     itype_done = 1;
                                     go_itype = 0;
@@ -819,6 +820,7 @@ always @(posedge clk or posedge reset)
                                     pcEn = 0;
                                     pc_select = 2'b0;
                                     branching_done = 1;
+                                    next_btype = B_S0;
                                     go_branching = 0;
                                 end 
                             default:
@@ -905,11 +907,12 @@ always @(posedge clk or posedge reset)
                                     pc_select = 2'b0;
                                     pcEn = 0;
                                     regWrite = 0;
+                                    aluSrc = 1;
                                     next_jalr = (go_jalr) ? JALR_S1 : JALR_S0;
                                 end 
                             JALR_S1:
                                 begin 
-                                    pc_select = 2'b10;
+                                    pc_select = 2'b11;
                                     pcEn = 1;
                                     regWrite = 1;
                                     jalr_done = 0;
@@ -921,6 +924,7 @@ always @(posedge clk or posedge reset)
                                     pcEn = 0;
                                     regWrite = 0;
                                     memToReg = 2'b0;
+                                    aluSrc = 0;
                                     jalr_done = 1;
                                     next_jalr = JALR_S0;
                                     go_jalr = 0;

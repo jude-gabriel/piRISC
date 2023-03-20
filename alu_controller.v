@@ -32,7 +32,7 @@ output reg [AWIDTH-1:0] aluop;
 input  [IWIDTH-1:0] instruction;
 
 // R type definitons 
-wire [3:0] func3 = instruction[9:7];
+wire [2:0] func3 = instruction[9:7];
 wire       func7 = instruction[10];
 
 always @(*)
