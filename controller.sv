@@ -169,11 +169,9 @@ always @(posedge reset)
 
         // Flags 
         go_fetch        = 0;
-        fetch_done      = 0;
         go_pc           = 0;
         pc_done         = 0;
         go_decode       = 0;
-        decode_done     = 0;
         go_rtype        = 0;
         rtype_done      = 0;
         go_itype        = 0;
@@ -182,8 +180,6 @@ always @(posedge reset)
         ltype_done      = 0;
         go_stype        = 0;
         stype_done      = 0;
-        go_branching    = 0;
-        branching_done  = 0;
         go_jal          = 0;
         jal_done        = 0;
         go_jalr         = 0;
@@ -270,17 +266,13 @@ always @(posedge clk or posedge reset)
                                     go_itype        = 0;
                                     go_ltype        = 0;
                                     go_stype        = 0;
-                                    go_branching    = 0;
                                     go_jal          = 0;
                                     go_jalr         = 0;
-                                    fetch_done      = 0;
                                     pc_done         = 0;
-                                    decode_done     = 0;
                                     rtype_done      = 0;
                                     itype_done      = 0;
                                     ltype_done      = 0;
                                     stype_done      = 0;
-                                    branching_done  = 0;
                                     jal_done        = 0;
                                     jalr_done       = 0;
                                     contr_done      = 1;
@@ -307,6 +299,7 @@ always @(posedge clk or posedge reset)
             begin 
                 curr_fetch = F_S0;
                 next_fetch = F_S0;
+                fetch_done = 0;
             end 
         else
             begin 
@@ -401,6 +394,8 @@ always @(posedge clk or posedge reset)
             begin 
                 curr_decode = D_S0;
                 next_decode = D_S0;
+                decode_done = 0;
+                go_branching = 0;
             end 
         else    
             begin
@@ -843,6 +838,7 @@ always @(posedge clk or posedge reset)
             begin 
                 curr_btype = B_S0;
                 next_btype = B_S0;
+                branching_done = 0
             end 
         else 
             begin
@@ -881,7 +877,6 @@ always @(posedge clk or posedge reset)
                                     pc_select_branching = 2'b0;
                                     branching_done = 1;
                                     next_btype = B_S0;
-                                    go_branching = 0;
                                 end 
                             default:
                                 begin 
