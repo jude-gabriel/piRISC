@@ -96,6 +96,21 @@ integer jal_done;           // Tells the controller the JAL Type FSM is done
 integer go_jalr;            // Tells the JALR Type FSM to start
 integer jalr_done;          // Tells the controller the JALR Type FSM is done
 
+always@(posedge reset or memToRegI or memToRegR or memToRegL or memToRegJAL or memToRegJALR)
+    begin 
+        if(reset)
+            memToReg = 2'b0;
+        else if(memToRegL > 2'b0)
+            memToReg = 2'b1;
+        else if(memToRegJAL > 2'b0)
+            memToReg = 2'b10;
+        else if (memToRegJALR)
+            memToReg = 2'b10;
+        else  
+            memToReg = 2'b0;
+    end 
+
+
 
 //------ RESET -----//
 always @(posedge reset)
@@ -505,6 +520,7 @@ always @(posedge clk or posedge reset)
 
 // ------ RTYPE FSM ------//
 r_state_t curr_rtype, next_rtype;
+integer memToRegR
 always @(posedge clk or posedge reset)
     begin 
         if(reset)
@@ -524,7 +540,7 @@ always @(posedge clk or posedge reset)
                                 begin 
                                     next_rtype = (go_rtype) ? R_S1 : R_S0;
                                     aluSrc = 0;
-                                    memToReg = 2'b0;
+                                    memToRegR = 2'b0;
                                     rtype_done = 0;
                                 end 
 
@@ -559,6 +575,7 @@ always @(posedge clk or posedge reset)
 
 //----- ITYPE FSM -----//
 i_state_t curr_itype, next_itype;
+integer memToRegI
 always @(posedge clk or posedge reset)
     begin 
         if(reset)
@@ -578,7 +595,7 @@ always @(posedge clk or posedge reset)
                                 begin 
                                     next_itype = (go_itype) ? I_S1 : I_S0;
                                     aluSrc = 1;
-                                    memToReg = 2'b0;
+                                    memToRegI = 2'b0;
                                     itype_done = 0;
                                 end 
 
@@ -615,6 +632,7 @@ always @(posedge clk or posedge reset)
 
 //------ LOAD FSM -----//
 l_state_t curr_ltype, next_ltype;
+integer memToRegL
 always @(posedge clk or posedge reset)
     begin 
         if(reset)
@@ -647,7 +665,7 @@ always @(posedge clk or posedge reset)
                                             end 
                                     ltype_done = 0;
                                     aluSrc = 1;
-                                    memToReg = 2'b1;
+                                    memToRegL = 2'b1;
                                     memRead = 0;
                                     regWrite = 0;
                                     isByte = 0;
@@ -686,7 +704,7 @@ always @(posedge clk or posedge reset)
                                     next_ltype = L_S0;
                                     regWrite = 0;
                                     aluSrc = 0;
-                                    memToReg = 2'b0;
+                                    memToRegL = 2'b0;
                                     ltype_done = 1;
                                     go_ltype = 0;
                                 end 
@@ -841,6 +859,7 @@ always @(posedge clk or posedge reset)
 
 //------ JAL FSM ------//
 jal_state_t curr_jal, next_jal;
+integer memToRegJAL;
 always @(posedge clk or posedge reset)
     begin 
         if(reset)
@@ -857,7 +876,7 @@ always @(posedge clk or posedge reset)
                             JAL_S0:
                                 begin
                                     next_jal = (go_jal) ? JAL_S1 : JAL_S0;
-                                    memToReg = 2'b10;
+                                    memToRegJAL = 2'b10;
                                     jal_done = 0;
                                     regWrite = 0;
                                     pc_select = 2'b0;
@@ -875,7 +894,7 @@ always @(posedge clk or posedge reset)
                                 begin 
                                     regWrite = 0;
                                     pc_select = 2'b0;
-                                    memToReg = 2'b0;
+                                    memToRegJAL = 2'b0;
                                     pcEn = 0;
                                     jal_done = 1;
                                     next_jal = JAL_S0;
@@ -893,6 +912,7 @@ always @(posedge clk or posedge reset)
 
 //----- JALR FSM -----// 
 jalr_state_t curr_jalr, next_jalr;
+integer memToRegJALR;
 always @(posedge clk or posedge reset)
     begin 
         if(reset)
@@ -909,7 +929,7 @@ always @(posedge clk or posedge reset)
                             JALR_S0:
                                 begin 
                                     jalr_done = 0;
-                                    memToReg = 2'b10;
+                                    memToRegJALR = 2'b10;
                                     pc_select = 2'b0;
                                     pcEn = 0;
                                     regWrite = 0;
@@ -929,7 +949,7 @@ always @(posedge clk or posedge reset)
                                     pc_select = 2'b0;
                                     pcEn = 0;
                                     regWrite = 0;
-                                    memToReg = 2'b0;
+                                    memToRegJALR = 2'b0;
                                     aluSrc = 0;
                                     jalr_done = 1;
                                     next_jalr = JALR_S0;
