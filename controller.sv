@@ -96,7 +96,49 @@ integer jal_done;           // Tells the controller the JAL Type FSM is done
 integer go_jalr;            // Tells the JALR Type FSM to start
 integer jalr_done;          // Tells the controller the JALR Type FSM is done
 
-always@(posedge reset or memToRegI or memToRegR or memToRegL or memToRegJAL or memToRegJALR)
+
+
+// ---- pc_select Driver ----//
+integer pc_select_update, pc_select_branching, pc_select_jal, pc_select_jalr;
+always @(posedge reset || pc_select_update || pc_select_branching || pc_select_jal || pc_select_jalr)
+    begin
+        if(reset)
+            pc_select = 2'b0;
+        else if(pc_select_branching > 2'b0)
+            pc_select = 2'b01;
+        else if(pc_select_jal > 2'b0)
+            pc_select = 2'b10;
+        else if(pc_select_jalr > 2'b0)
+            pc_select = 2'b11;
+        else 
+            pc_select = 2'b0;
+    end 
+
+// ---- aluSrc Driver ----//
+integer aluSrcR, aluSrcI, aluSrcL, aluSrcS, aluSrcJALR;
+always @(posedge reset || aluSrcR, aluSrcI, aluSrcL, aluSrcS, aluSrcJALR)
+    begin
+        if(reset)
+            aluSrc = 0;
+        else if(aluSrcI > 0)
+            aluSrc = 1;
+        else if(aluSrcL > 0)
+            aluSrc = 1;
+        else if(aluSrcS > 0)
+            aluSrc = 1;
+        else if(aluSrcJALR > 0)
+            aluSrc = 1
+        else 
+            aluSrc = 0;
+    end 
+
+
+
+
+
+//--- memToReg Driver -----//
+integer memToRegI, memToRegR, memToRegL, memToRegJAL, memToRegJALR;
+always@(posedge reset || memToRegI || memToRegR || memToRegL || memToRegJAL || memToRegJALR)
     begin 
         if(reset)
             memToReg = 2'b0;
@@ -118,10 +160,7 @@ always @(posedge reset)
         // Outputs 
         irEn            = 0;
         pcEn            = 0;
-        pc_select       = 2'b0;
-        aluSrc          = 0;
         regWrite        = 0;
-        memToReg        = 2'b0;
         isByte          = 0;
         isHalf          = 0;
         isWord          = 0;
@@ -324,12 +363,12 @@ always @(posedge clk or posedge reset)
                                 begin 
                                     next_pc = (go_pc) ? P_S1 : P_S0;
                                     pcEn = 0;
-                                    pc_select = 2'b0;
+                                    pc_select_update = 2'b0;
                                     pc_done = 0;
                                 end
                             P_S1:
                                 begin 
-                                    pc_select = 2'b0;
+                                    pc_select_update = 2'b0;
                                     pcEn = 1;
                                     pc_done = 0;
                                     next_pc = P_S2;
@@ -337,7 +376,7 @@ always @(posedge clk or posedge reset)
                             P_S2:
                                 begin 
                                     pcEn = 0;
-                                    pc_select = 2'b0;
+                                    pc_select_update = 2'b0;
                                     pc_done = 1;
                                     go_pc = 0;
                                     next_pc = P_S0;
@@ -520,7 +559,6 @@ always @(posedge clk or posedge reset)
 
 // ------ RTYPE FSM ------//
 r_state_t curr_rtype, next_rtype;
-integer memToRegR
 always @(posedge clk or posedge reset)
     begin 
         if(reset)
@@ -539,7 +577,7 @@ always @(posedge clk or posedge reset)
                             R_S0: 
                                 begin 
                                     next_rtype = (go_rtype) ? R_S1 : R_S0;
-                                    aluSrc = 0;
+                                    aluSrcR = 0;
                                     memToRegR = 2'b0;
                                     rtype_done = 0;
                                 end 
@@ -575,7 +613,6 @@ always @(posedge clk or posedge reset)
 
 //----- ITYPE FSM -----//
 i_state_t curr_itype, next_itype;
-integer memToRegI
 always @(posedge clk or posedge reset)
     begin 
         if(reset)
@@ -594,7 +631,7 @@ always @(posedge clk or posedge reset)
                             I_S0:
                                 begin 
                                     next_itype = (go_itype) ? I_S1 : I_S0;
-                                    aluSrc = 1;
+                                    aluSrcI = 1;
                                     memToRegI = 2'b0;
                                     itype_done = 0;
                                 end 
@@ -611,7 +648,7 @@ always @(posedge clk or posedge reset)
                             I_S2:
                                 begin 
                                     next_itype = I_S0;
-                                    aluSrc = 1;
+                                    aluSrcI = 1;
                                     regWrite = 0;
                                     itype_done = 1;
                                     go_itype = 0;
@@ -632,7 +669,6 @@ always @(posedge clk or posedge reset)
 
 //------ LOAD FSM -----//
 l_state_t curr_ltype, next_ltype;
-integer memToRegL
 always @(posedge clk or posedge reset)
     begin 
         if(reset)
@@ -664,7 +700,7 @@ always @(posedge clk or posedge reset)
                                                 next_ltype = L_S3;
                                             end 
                                     ltype_done = 0;
-                                    aluSrc = 1;
+                                    aluSrcL = 1;
                                     memToRegL = 2'b1;
                                     memRead = 0;
                                     regWrite = 0;
@@ -703,7 +739,7 @@ always @(posedge clk or posedge reset)
                                 begin 
                                     next_ltype = L_S0;
                                     regWrite = 0;
-                                    aluSrc = 0;
+                                    aluSrcL = 0;
                                     memToRegL = 2'b0;
                                     ltype_done = 1;
                                     go_ltype = 0;
@@ -754,7 +790,7 @@ always @(posedge clk or posedge reset)
                                                 end 
                                         end 
                                     stype_done = 0;
-                                    aluSrc = 1;
+                                    aluSrcS = 1;
                                     isByte = 0;
                                     isHalf = 0;
                                     isWord = 0;
@@ -784,7 +820,7 @@ always @(posedge clk or posedge reset)
                                     isHalf = 0;
                                     isWord = 0;
                                     memWrite = 0;
-                                    aluSrc = 0;
+                                    aluSrcS = 0;
                                     stype_done = 1;
                                     next_stype = S_S0;
                                     go_stype = 0;
@@ -817,7 +853,7 @@ always @(posedge clk or posedge reset)
                             B_S0:
                                 begin 
                                     branching_done = 0;
-                                    pc_select = 0;
+                                    pc_select_branching = 0;
                                     pcEn = 0;
                                     if(go_branching)
                                         begin 
@@ -831,7 +867,7 @@ always @(posedge clk or posedge reset)
                                 end 
                             B_S1:
                                 begin 
-                                    pc_select = 2'b01;
+                                    pc_select_branching = 2'b01;
                                     pcEn = 1;
                                     next_btype = B_S3;
                                 end
@@ -842,7 +878,7 @@ always @(posedge clk or posedge reset)
                             B_S3:
                                 begin
                                     pcEn = 0;
-                                    pc_select = 2'b0;
+                                    pc_select_branching = 2'b0;
                                     branching_done = 1;
                                     next_btype = B_S0;
                                     go_branching = 0;
@@ -859,7 +895,6 @@ always @(posedge clk or posedge reset)
 
 //------ JAL FSM ------//
 jal_state_t curr_jal, next_jal;
-integer memToRegJAL;
 always @(posedge clk or posedge reset)
     begin 
         if(reset)
@@ -879,13 +914,13 @@ always @(posedge clk or posedge reset)
                                     memToRegJAL = 2'b10;
                                     jal_done = 0;
                                     regWrite = 0;
-                                    pc_select = 2'b0;
+                                    pc_select_jal = 2'b0;
                                     pcEn = 0;
                                 end 
                             JAL_S1:
                                 begin 
                                     regWrite = 1;
-                                    pc_select = 2'b10;
+                                    pc_select_jal = 2'b10;
                                     pcEn = 1;
                                     next_jal = JAL_S2;
                                     jal_done = 0;
@@ -893,7 +928,7 @@ always @(posedge clk or posedge reset)
                             JAL_S2:
                                 begin 
                                     regWrite = 0;
-                                    pc_select = 2'b0;
+                                    pc_select_jal = 2'b0;
                                     memToRegJAL = 2'b0;
                                     pcEn = 0;
                                     jal_done = 1;
@@ -912,7 +947,6 @@ always @(posedge clk or posedge reset)
 
 //----- JALR FSM -----// 
 jalr_state_t curr_jalr, next_jalr;
-integer memToRegJALR;
 always @(posedge clk or posedge reset)
     begin 
         if(reset)
@@ -930,15 +964,15 @@ always @(posedge clk or posedge reset)
                                 begin 
                                     jalr_done = 0;
                                     memToRegJALR = 2'b10;
-                                    pc_select = 2'b0;
+                                    pc_select_jalr = 2'b0;
                                     pcEn = 0;
                                     regWrite = 0;
-                                    aluSrc = 1;
+                                    aluSrcJALR = 1;
                                     next_jalr = (go_jalr) ? JALR_S1 : JALR_S0;
                                 end 
                             JALR_S1:
                                 begin 
-                                    pc_select = 2'b11;
+                                    pc_select_jalr = 2'b11;
                                     pcEn = 1;
                                     regWrite = 1;
                                     jalr_done = 0;
@@ -946,11 +980,11 @@ always @(posedge clk or posedge reset)
                                 end
                             JALR_S2:
                                 begin 
-                                    pc_select = 2'b0;
+                                    pc_select_jalr = 2'b0;
                                     pcEn = 0;
                                     regWrite = 0;
                                     memToRegJALR = 2'b0;
-                                    aluSrc = 0;
+                                    aluSrcJALR = 0;
                                     jalr_done = 1;
                                     next_jalr = JALR_S0;
                                     go_jalr = 0;
