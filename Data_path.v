@@ -21,7 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module Data_path(clk, reset, irEn, pcEn, pcSelect, regWrite, aluSrc, ramRdEn, ramWrEn, isByte, isHalf, isWord, memToReg, viewAlu, comparatorOut, irOut);
+module Data_path(clk, reset, irEn, pcEn, pcSelect, regWrite, aluSrc, ramRdEn, ramWrEn, isByte, isHalf, isWord, memToReg, comparatorOut, irOut);
 
 
 //Parameters
@@ -46,8 +46,7 @@ input wire ramWrEn;               // Write Enable for the Ram
 input wire isByte;                // Read Byte from Ram
 input wire isHalf;                // Read Half from Ram
 input wire isWord;                // Read Word from Ram 
-input wire [1:0] memToReg;              // Select Signal for ALU or Data Mem 
-output wire [DWIDTH-1:0] viewAlu;  //output to view alu
+input wire [1:0] memToReg;        // Select Signal for ALU or Data Mem 
 
 /******* Internal Wires ******/ 
 
@@ -110,8 +109,6 @@ alu             alu1(aluOut, aluOp, regFileOut1, aluInput2, pcOut);
 
 // Data Memory 
 RAM r1(regFileOut2, dataMemOut, ramRdEn, ramWrEn, aluOut, isByte, isHalf, isWord, irOut[14:12], clk);
-
-assign viewAlu = aluOut;
 
 
 endmodule

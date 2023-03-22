@@ -35,17 +35,16 @@ module registerfile (
   //Defines 32 32-bit registers b
   reg [31:0] regfile [31:0];
   
-  integer i;
-  always @(posedge reset)
-    begin 
-        for(i = 0; i < 32; i = i + 1)
+  integer i;  
+  always @(posedge clk or posedge reset) begin
+    if(reset)
+      begin
+         for(i = 0; i < 32; i = i + 1)
             begin 
                 regfile[i] = 32'b0;
              end
-    end 
-  
-  always @(posedge clk) begin
-    if (RegWrite) begin
+      end
+    else if (RegWrite) begin
         if(wr_addr == 32'b0)
             begin 
                 regfile[wr_addr] = 32'b0;

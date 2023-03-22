@@ -97,56 +97,88 @@ integer go_jalr;            // Tells the JALR Type FSM to start
 integer jalr_done;          // Tells the controller the JALR Type FSM is done
 
 
-//------ RESET -----//
-always @(posedge reset)
-    begin 
-        // Outputs 
-        irEn            = 0;
-        pcEn            = 0;
-        pc_select       = 2'b0;
-        aluSrc          = 0;
-        regWrite        = 0;
-        memToReg        = 2'b0;
-        isByte          = 0;
-        isHalf          = 0;
-        isWord          = 0;
-        memRead         = 0;
-        memWrite        = 0;
+//---- Controller States ----// 
+contr_state_t   curr_contr, next_contr;
+fetch_state_t   curr_fetch, next_fetch;
+pc_state_t      curr_pc, next_pc;
+decode_state_t  curr_decode, next_decode;
+r_state_t       curr_rtype, next_rtype;
+i_state_t       curr_itype, next_itype;
+l_state_t       curr_ltype, next_ltype;
+s_state_t       curr_stype, next_stype;
+b_state_t       curr_btype, next_btype;
+jal_state_t     curr_jal, next_jal;
+jalr_state_t    curr_jalr, next_jalr;
 
-        // Flags 
-        go_fetch        = 0;
-        fetch_done      = 0;
-        go_pc           = 0;
-        pc_done         = 0;
-        go_decode       = 0;
-        decode_done     = 0;
-        go_rtype        = 0;
-        rtype_done      = 0;
-        go_itype        = 0;
-        itype_done      = 0;
-        go_ltype        = 0;
-        ltype_done      = 0;
-        go_stype        = 0;
-        stype_done      = 0;
-        go_branching    = 0;
-        branching_done  = 0;
-        go_jal          = 0;
-        jal_done        = 0;
-        go_jalr         = 0;
-        jalr_done       = 0;
-    end
 
-//-------- Main Controller -------//
-contr_state_t curr_contr, next_contr;
+//-------- Controller ------// 
 always @(posedge clk or posedge reset)
     begin
         if(reset)
             begin 
+                // Outputs 
+                irEn            = 0;
+                pcEn            = 0;
+                pc_select       = 2'b0;
+                aluSrc          = 0;
+                regWrite        = 0;
+                memToReg        = 2'b0;
+                isByte          = 0;
+                isHalf          = 0;
+                isWord          = 0;
+                memRead         = 0;
+                memWrite        = 0;
+
+                // Flags 
+                go_fetch        = 0;
+                fetch_done      = 0;
+                go_pc           = 0;
+                pc_done         = 0;
+                go_decode       = 0;
+                decode_done     = 0;
+                go_rtype        = 0;
+                rtype_done      = 0;
+                go_itype        = 0;
+                itype_done      = 0;
+                go_ltype        = 0;
+                ltype_done      = 0;
+                go_stype        = 0;
+                stype_done      = 0;
+                go_branching    = 0;
+                branching_done  = 0;
+                go_jal          = 0;
+                jal_done        = 0;
+                go_jalr         = 0;
+                jalr_done       = 0;
+
+                // Controller States
                 curr_contr = C_S0;
                 next_contr = C_S0;
+                curr_fetch = F_S0;
+                next_fetch = F_S0;
+                curr_pc = P_S0;
+                next_pc = P_S0;
+                curr_decode = D_S0;
+                next_decode = D_S0;
+                curr_rtype = R_S0;
+                next_rtype = R_S0;
+                curr_itype = I_S0;
+                next_itype = I_S0;
+                curr_ltype = L_S0;
+                next_ltype = L_S0;
+                curr_stype = S_S0;
+                next_stype = S_S0;
+                curr_btype = B_S0;
+                next_btype = B_S0;
+                curr_jal = JAL_S0;
+                next_jal = JAL_S0;
+                curr_jalr = JALR_S0;
+                next_jalr = JALR_S0;
             end
         else
             begin 
+
+                //---- MAIN CONTROLLER -----//
                 curr_contr = next_contr;
                 if(go_contr)
                     begin 
@@ -241,22 +273,10 @@ always @(posedge clk or posedge reset)
                                 end
                         endcase
                     end 
-            end 
-    end 
 
 
-//-------- Fetch FSM -------//
-fetch_state_t curr_fetch, next_fetch;
-always @(posedge clk or posedge reset)
-    begin
-        if(reset)
-            begin 
-                curr_fetch = F_S0;
-                next_fetch = F_S0;
-            end 
-        else
-            begin 
-            curr_fetch = next_fetch;
+                //------- FETCH CONTROLLER ------//
+                curr_fetch = next_fetch;
                 if(go_fetch)
                     begin
                         case(curr_fetch)
@@ -286,21 +306,8 @@ always @(posedge clk or posedge reset)
                                 end
                         endcase
                     end
-            end
-    end 
 
-
-//-------- PC Update FSM ------//
-pc_state_t curr_pc, next_pc;
-always @(posedge clk or posedge reset)
-    begin 
-        if(reset)
-            begin 
-                curr_pc = P_S0;
-                next_pc = P_S0;
-            end
-        else    
-            begin 
+                //----- PC CONTROLLER ------//
                 curr_pc = next_pc;
                 if(go_pc)
                     begin 
@@ -333,23 +340,9 @@ always @(posedge clk or posedge reset)
                                     pc_done = 0;
                                 end 
                         endcase
-                    end 
-            end
-    end
+                    end
 
-
-
-//------ Decode FSM -----//
-decode_state_t curr_decode, next_decode;
-always @(posedge clk or posedge reset)
-    begin 
-        if(reset)
-            begin 
-                curr_decode = D_S0;
-                next_decode = D_S0;
-            end 
-        else    
-            begin
+                //------- DECODE CONTROLLER ------// 
                 curr_decode = next_decode;
                 if(go_decode)
                     begin 
@@ -497,23 +490,8 @@ always @(posedge clk or posedge reset)
                                 end
                         endcase
                     end
-            end
-    end 
 
-
-
-
-// ------ RTYPE FSM ------//
-r_state_t curr_rtype, next_rtype;
-always @(posedge clk or posedge reset)
-    begin 
-        if(reset)
-            begin 
-                curr_rtype = R_S0;
-                next_rtype = R_S0;
-            end 
-        else 
-            begin 
+                //----- RTYPE CONTROLLER -----//
                 curr_rtype = next_rtype;
                 if(go_rtype)
                     begin 
@@ -551,23 +529,9 @@ always @(posedge clk or posedge reset)
                                     rtype_done = 0;
                                 end 
                         endcase 
-                    end 
-            end 
-    end 
+                    end
 
-
-
-//----- ITYPE FSM -----//
-i_state_t curr_itype, next_itype;
-always @(posedge clk or posedge reset)
-    begin 
-        if(reset)
-            begin 
-                curr_itype = I_S0;
-                next_itype = I_S0;
-            end 
-        else 
-            begin
+                //------ ITYPE CONTROLLER -----//
                 curr_itype = next_itype;
                 if(go_itype)
                     begin 
@@ -608,22 +572,9 @@ always @(posedge clk or posedge reset)
                                 end 
 
                         endcase 
-                    end 
-            end
-    end  
+                    end
 
-
-//------ LOAD FSM -----//
-l_state_t curr_ltype, next_ltype;
-always @(posedge clk or posedge reset)
-    begin 
-        if(reset)
-            begin 
-                curr_ltype = L_S0;
-                next_ltype = L_S0;
-            end 
-        else
-            begin 
+                //----- LOAD TYPE CONTROLLER -----//
                 curr_ltype = next_ltype;
                 if(go_ltype)
                     begin 
@@ -697,23 +648,9 @@ always @(posedge clk or posedge reset)
                                     ltype_done = 0;
                                 end 
                         endcase 
-                    end 
-            end 
-    end 
+                    end
 
-
-
-//----- Store FSM -----//
-s_state_t curr_stype, next_stype;
-always @(posedge clk or posedge reset)
-    begin 
-        if(reset)
-                begin 
-                    curr_stype = S_S0;
-                    next_stype = S_S0;
-                end
-        else 
-            begin 
+                //---- STORE TYPE CONTROLLER -----//
                 curr_stype = next_stype;
                 if(go_stype)
                     begin 
@@ -777,21 +714,9 @@ always @(posedge clk or posedge reset)
                                     next_stype = curr_stype;
                                 end 
                         endcase 
-                    end 
-            end 
-    end 
+                    end
 
-//----- Branching FSM -----//
-b_state_t curr_btype, next_btype;
-always @(posedge clk or posedge reset)
-    begin 
-        if(reset)
-            begin 
-                curr_btype = B_S0;
-                next_btype = B_S0;
-            end 
-        else 
-            begin
+                //------ BRANCHING TYPE CONTROLLER ----//
                 curr_btype = next_btype;
                 if(go_branching)
                     begin 
@@ -835,21 +760,9 @@ always @(posedge clk or posedge reset)
                                     branching_done = 0;
                                 end 
                         endcase 
-                    end 
-            end
-    end 
+                    end
 
-//------ JAL FSM ------//
-jal_state_t curr_jal, next_jal;
-always @(posedge clk or posedge reset)
-    begin 
-        if(reset)
-            begin 
-                curr_jal = JAL_S0;
-                next_jal = JAL_S0;
-            end 
-        else 
-            begin
+                //----- JAL TYPE CONTROLLER ----//
                 curr_jal = next_jal;
                 if(go_jal)
                     begin
@@ -887,22 +800,11 @@ always @(posedge clk or posedge reset)
                                     jal_done = 0;
                                 end 
                         endcase 
-                    end 
-            end
-    end 
+                    end
 
-//----- JALR FSM -----// 
-jalr_state_t curr_jalr, next_jalr;
-always @(posedge clk or posedge reset)
-    begin 
-        if(reset)
-            begin 
-                curr_jalr = JALR_S0;
-                next_jalr = JALR_S0;
-            end 
-        else
-            begin 
-            curr_jalr = next_jalr;
+
+                //------- JALR CONTROLLER -----//
+                curr_jalr = next_jalr;
                 if(go_jalr)
                     begin 
                         case(curr_jalr)
@@ -942,6 +844,6 @@ always @(posedge clk or posedge reset)
                                 end
                         endcase
                     end
-            end
-    end
+            end 
+    end 
 endmodule

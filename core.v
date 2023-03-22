@@ -1,6 +1,6 @@
 `timescale 1ns / 1ns
 
-module core(viewAlu, irOut, clk, reset, go_contr);
+module core(irOut, clk, reset, go_contr);
 
 parameter WIDTH = 32;
 
@@ -11,7 +11,6 @@ input reset;    // Reset signal
 input go_contr; // Go signal for core
 
 // Sys outputs 
-output [WIDTH-1:0] viewAlu;
 output wire [WIDTH-1:0] irOut;
 
 
@@ -45,7 +44,7 @@ controller contr(irEn, pcEn, pc_select, aluSrc, regWrite, memToReg, isByte, isHa
 
 
 // Data Path
-Data_path dp(clk, reset, irEn, pcEn, pc_select, regWrite, aluSrc, memRead, memWrite, isByte, isHalf, isWord, memToReg, viewAlu, comp, irOut);
+Data_path dp(clk, reset, irEn, pcEn, pc_select, regWrite, aluSrc, memRead, memWrite, isByte, isHalf, isWord, memToReg, comp, irOut);
 
 
 endmodule

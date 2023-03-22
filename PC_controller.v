@@ -42,14 +42,11 @@ module PC_controller(clk, reset, pc_in, pc_en, immgen_in, alu_in, pc_select, pc_
     wire signed [DWIDTH-1:0] immSigned = immgen_in;
     wire signed [DWIDTH-1:0] aluSigned = alu_in;
     
-    always @(posedge reset)
-        begin 
-            pc_value <= 4'h0;
-        end 
-    
-    always @(posedge clk)
+    always @(posedge clk or posedge reset)
     begin
-        if(pc_en)
+        if(reset)
+            pc_value <= 4'h0;
+        else if(pc_en)
             begin
                 if(pc_select == `NORMALOP)
                 begin

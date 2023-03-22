@@ -8,7 +8,6 @@ reg reset;
 reg go_contr;
 
 // Outputs 
-wire viewAlu;
 wire [31:0] irOut;
 
 always @(irOut)
@@ -25,7 +24,7 @@ initial
     end
 
 // Instantiate Model
-core core(viewAlu, irOut, clk, reset, go_contr);
+core core(irOut, clk, reset, go_contr);
 
 initial 
     begin
