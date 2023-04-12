@@ -65,7 +65,7 @@ module PC_controller(clk, reset, pc_in, pc_en, immgen_in, alu_in, pc_select, pc_
                     end               
                 else if(pc_select == `JALR)
                 begin
-                    pc_value <= pc_in + aluSigned;
+                    pc_value <= aluSigned;
                 end  
                 else pc_value <= pc_in + 4'h4;
             end

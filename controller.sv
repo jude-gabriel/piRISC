@@ -64,7 +64,7 @@ typedef enum {JALR_S0, JALR_S1, JALR_S2} jalr_state_t;                  // JALR 
 
 //----- FLAGS -------// 
 input   go_contr;           // Tells the controller to start
-integer contr_done;          // Instruction finished
+integer contr_done;         // Instruction finished
 
 integer go_fetch;           // Tells the Fetch FSM to start
 integer fetch_done;         // Tells the controller the Fetch FSM is done
@@ -728,8 +728,8 @@ always @(posedge clk or posedge reset)
                                                 begin 
                                                     next_btype = B_S1;
                                                 end 
-                                            else    
-                                                next_btype = B_S2;
+                                            else
+                                                next_btype = B_S3;
                                         end 
                                 end 
                             B_S1:
@@ -748,6 +748,7 @@ always @(posedge clk or posedge reset)
                                     pc_select = 2'b0;
                                     branching_done = 1;
                                     next_btype = B_S0;
+                                    go_branching = 0;
                                 end 
                             default:
                                 begin 

@@ -31,7 +31,7 @@ initial
         #20 reset = 1;
         #20 reset = 0;
         #20 go_contr = 1;
-        #30000 $stop;
+        #100000 $stop;
     end 
 
 endmodule
